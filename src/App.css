@@ -1,11 +1,17 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Patrick Hand', cursive, sans-serif;
+  font-family: "Patrick Hand", cursive, sans-serif;
   background-color: #fff8dc;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 2.4rem,
+    #d3cfc7 2.5rem
+  );
 }
 
-.app::before {
+/* .app::before {
   content: "";
   position: absolute;
   top: 0;
@@ -14,21 +20,34 @@ body {
   height: 100%;
   background-color: #666;
   z-index: -1;
+} */
+
+.share-bar {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.share-bar button {
+  background-color: #fff;
+  border: 2px solid #000;
+  font-size: 1rem;
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Patrick Hand', cursive, sans-serif;
 }
 
 
-.app {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent,
-    transparent 2.4rem,
-    #d3cfc7 2.5rem
-  );
-  max-width: 400px;
+.container {
+  max-width: 600px;
   margin: 0 auto;
+}
+
+.app {
+  width: 100%;
   padding: 2rem 1rem;
-  background-color: #fff8dc;
   min-height: 100vh;
+  box-sizing: border-box;
   position: relative;
 }
 
@@ -38,7 +57,6 @@ h1 {
   font-size: 2rem;
   margin-bottom: 1rem;
 }
-
 
 .input-bar {
   display: flex;
@@ -65,8 +83,52 @@ h1 {
 
 ul.list {
   list-style: none;
-  padding: 0;
+  padding: 1rem 0 0 0; /* push list down 5 lines (adjust as needed) */
+  margin: 0;
 }
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.controls button {
+  font-family: 'Patrick Hand', cursive, sans-serif;
+  background: #fff;
+  border: 2px solid #000;
+  padding: 0.4rem 1rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.language-selector {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  gap: 0.3rem;
+}
+
+.language-selector button {
+  font-size: 1rem;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 6px;
+  opacity: 0.6;
+}
+
+.language-selector button.active {
+  border-color: #000;
+  background-color: #fff8dc;
+  opacity: 1;
+}
+
+
 
 ul.list li {
   display: flex;
@@ -89,8 +151,7 @@ ul.list li span {
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
 }
 
-
-ul.list input[type='checkbox'] {
+ul.list input[type="checkbox"] {
   margin-right: 0.5rem;
   width: 20px;
   height: 20px;
@@ -103,4 +164,3 @@ footer {
   color: #555;
   font-size: 0.9rem;
 }
-
