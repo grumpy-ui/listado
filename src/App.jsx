@@ -25,7 +25,8 @@ function App() {
       footer: "Made with ❤️ by Radu",
       linkAlert: "Link copied to clipboard",
       qty: "Qty",
-      unit: "Unit",
+      unitPlaceholder: "Unit",
+      add: "Add",
     },
     ro: {
       title: "Lista de cumpărături",
@@ -35,7 +36,8 @@ function App() {
       footer: "Făcut cu ❤️ de Radu",
       linkAlert: "Link copiat in clipboard",
       qty: "Cant.",
-      unit: "Unitate",
+      unitPlaceholder: "Unitate",
+      add: "Adaugă",
     },
     es: {
       title: "Lista de compras",
@@ -45,7 +47,8 @@ function App() {
       footer: "Hecho con ❤️ por Radu",
       linkAlert: "Enlace copiado al portapapeles",
       qty: "Cant.",
-      unit: "Unidad",
+      unitPlaceholder: "Unidad",
+      add: "Agregar"
     },
   };
 
@@ -69,11 +72,15 @@ function App() {
     return () => unsubscribe();
   }, [id, navigate]);
 
+  const sortItems = (arr) => {
+    return [...arr].sort((a, b) => a.bought - b.bought);
+  };
+
   const addItem = () => {
     if (input.trim() === "") return;
     const qty = quantity.trim() === "" ? 1 : parseInt(quantity);
     const unitValue = unit.trim();
-    const newItems = [
+    const newItems = sortItems([
       ...items,
       {
         text: input.trim(),
@@ -81,9 +88,10 @@ function App() {
         unit: unitValue,
         bought: false,
       },
-    ];
+    ]);
     setItems(newItems);
     updateList(id, newItems);
+
     setInput("");
     setQuantity("");
     setUnit("");
@@ -92,8 +100,16 @@ function App() {
   const toggleItem = (index) => {
     const newItems = [...items];
     newItems[index].bought = !newItems[index].bought;
-    setItems(newItems);
-    updateList(id, newItems);
+    const sorted = sortItems(newItems);
+    setItems(sorted);
+    updateList(id, sorted);
+  };
+
+  const handleDeleteItem = (index) => {
+    const newItems = items.filter((_, i) => i !== index);
+    const sorted = sortItems(newItems);
+    setItems(sorted);
+    updateList(id, sorted);
   };
 
   const handleShare = () => {
@@ -149,7 +165,6 @@ function App() {
           <button onClick={handleNewList}>🆕 {t.newList}</button>
           <button onClick={handleShare}>🔗 {t.share}</button>
         </div>
-
         <div className="input-bar">
           <input
             type="text"
@@ -157,40 +172,51 @@ function App() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addItem()}
+            className="item-name-input"
           />
-          <input
-            type="number"
-            placeholder= {t.qty}
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addItem()}
-            className="quantity-input"
-          />
-          <input
-            type="text"
-            placeholder= {t.unit}
-            value={unit}
-            onChange={(e) => setUnit(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addItem()}
-            className="unit-input"
-          />
-          <button onClick={addItem}>+</button>
+
+          <div className="input-row">
+            <input
+              type="number"
+              placeholder={t.qtyPlaceholder}
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addItem()}
+              className="quantity-input"
+            />
+            <input
+              type="text"
+              placeholder={t.unitPlaceholder}
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addItem()}
+              className="unit-input"
+            />
+          </div>
+
+          <button className="add-button" onClick={addItem}>
+            {t.add}
+          </button>
         </div>
 
         <ul className="list">
           {items.map((item, index) => (
-            <li
-              key={index}
-              className={item.bought ? "bought" : ""}
-              onClick={() => toggleItem(index)}
-            >
-              <input type="checkbox" checked={item.bought} readOnly />
-              <span>
-                {item.text}
-                {item.quantity > 1 || item.unit
-                  ? ` — ${item.quantity}${item.unit ? " " + item.unit : ""}`
-                  : ""}
-              </span>
+            <li key={index} className={item.bought ? "bought" : ""}>
+              <div className="item-content" onClick={() => toggleItem(index)}>
+                <input type="checkbox" checked={item.bought} readOnly />
+                <span>
+                  {item.text}
+                  {item.quantity > 1 || item.unit
+                    ? ` — ${item.quantity}${item.unit ? " " + item.unit : ""}`
+                    : ""}
+                </span>
+              </div>
+              <button
+                className="delete-button"
+                onClick={() => handleDeleteItem(index)}
+              >
+                🗑️
+              </button>
             </li>
           ))}
         </ul>

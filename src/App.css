@@ -34,9 +34,8 @@ body {
   padding: 0.4rem 1rem;
   border-radius: 8px;
   cursor: pointer;
-  font-family: 'Patrick Hand', cursive, sans-serif;
+  font-family: "Patrick Hand", cursive, sans-serif;
 }
-
 
 .container {
   max-width: 600px;
@@ -45,11 +44,37 @@ body {
 
 .app {
   width: 100%;
+  max-width: 600px; /* For tablets/desktops */
+  margin: 0 auto;
   padding: 2rem 1rem;
   min-height: 100vh;
-  box-sizing: border-box;
   position: relative;
+  box-sizing: border-box;
 }
+
+@media (max-width: 480px) {
+  .app {
+    padding: 1.5rem 0.5rem;
+  }
+
+  .input-bar input,
+  .input-bar .quantity-input,
+  .input-bar .unit-input {
+    font-size: 1rem;
+    padding: 0.4rem;
+  }
+
+  .input-bar button {
+    font-size: 1.2rem;
+    padding: 0 0.8rem;
+  }
+
+  .controls button {
+    font-size: 0.9rem;
+    padding: 0.3rem 0.8rem;
+  }
+}
+
 
 h1 {
   color: #222;
@@ -60,8 +85,18 @@ h1 {
 
 .input-bar {
   display: flex;
+  flex-direction: column;
   gap: 0.5rem;
   margin-bottom: 1rem;
+}
+
+.item-name-input {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1.2rem;
+  border: 2px solid #000;
+  border-radius: 8px;
+  font-family: 'Patrick Hand', cursive;
 }
 
 .input-bar input {
@@ -69,24 +104,57 @@ h1 {
   font-size: 1.2rem;
   border: 2px solid #000;
   border-radius: 8px;
-  font-family: 'Patrick Hand', cursive, sans-serif;
+  font-family: "Patrick Hand", cursive, sans-serif;
 }
 
-.input-bar input[type="text"] {
-  flex: 2;
+.input-row {
+  display: flex;
+  gap: 0.5rem;
 }
-.input-bar .unit-input {
-  width: 80px;
+
+.quantity-input,
+.unit-input {
+  flex: 1;
+  min-width: 60px;
   text-align: center;
+  padding: 0.4rem;
+  font-size: 1rem;
+  border: 2px solid #000;
+  border-radius: 8px;
+  font-family: 'Patrick Hand', cursive;
+}
+
+.add-button-container {
+  display: flex;
+  justify-content: center;
+}
+
+.add-button {
+  margin-top: 0.3rem;
+  padding: 0.4rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #000;
+  border-radius: 8px;
+  background-color: #fff;
+  font-family: 'Patrick Hand', cursive;
+  cursor: pointer;
+  text-align: center;
+  align-self: flex-start; /* 👈 this moves it to the left */
 }
 
 
-.input-bar .quantity-input {
-  width: 80px;
-  text-align: center;
+.add-button-container button {
+  font-size: 2rem;
+  padding: 0.4rem 1.2rem;
+  border: 2px solid #000;
+  border-radius: 12px;
+  background-color: #fff;
+  font-family: 'Patrick Hand', cursive;
+  cursor: pointer;
 }
 
 .input-bar button {
+  flex: 0 0 auto;
   font-size: 1.5rem;
   padding: 0 1rem;
   background: #fff;
@@ -94,8 +162,6 @@ h1 {
   border-radius: 8px;
   cursor: pointer;
 }
-
-
 
 ul.list {
   list-style: none;
@@ -111,7 +177,7 @@ ul.list {
 }
 
 .controls button {
-  font-family: 'Patrick Hand', cursive, sans-serif;
+  font-family: "Patrick Hand", cursive, sans-serif;
   background: #fff;
   border: 2px solid #000;
   padding: 0.4rem 1rem;
@@ -147,14 +213,37 @@ ul.list {
 ul.list li {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0.5rem;
   font-size: 1.2rem;
   cursor: pointer;
   color: #222;
-  transition: all 0.2s ease; /* ✨ smooth transitions */
-  transform: translateY(10px);
-  opacity: 0;
+  transition: all 0.2s ease;
   animation: fadeIn 0.3s ease forwards;
+}
+
+.item-content {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.item-content span {
+  flex-grow: 1;
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0.6;
+  padding: 0.2rem;
+  transition: opacity 0.2s ease;
+}
+
+.delete-button:hover {
+  opacity: 1;
 }
 
 @keyframes fadeIn {
@@ -163,8 +252,6 @@ ul.list li {
     opacity: 1;
   }
 }
-
-
 
 ul.list li.bought span {
   text-decoration: line-through;
@@ -187,16 +274,21 @@ ul.list input[type="checkbox"] {
   height: 20px;
   accent-color: #444;
 }
-ul.list input[type='checkbox']:checked {
+ul.list input[type="checkbox"]:checked {
   animation: pop 0.2s ease;
 }
 
 @keyframes pop {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.2); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
-
 
 footer {
   margin-top: 2rem;
