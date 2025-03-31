@@ -9,8 +9,10 @@ import {
 import "./App.css";
 
 function App() {
+  const [quantity, setQuantity] = useState("");
   const [items, setItems] = useState([]);
   const [input, setInput] = useState("");
+  const [unit, setUnit] = useState("");
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -22,6 +24,8 @@ function App() {
       newList: "New List",
       footer: "Made with ❤️ by Radu",
       linkAlert: "Link copied to clipboard",
+      qty: "Qty",
+      unit: "Unit",
     },
     ro: {
       title: "Lista de cumpărături",
@@ -30,6 +34,8 @@ function App() {
       newList: "Listă Nouă",
       footer: "Făcut cu ❤️ de Radu",
       linkAlert: "Link copiat in clipboard",
+      qty: "Cant.",
+      unit: "Unitate",
     },
     es: {
       title: "Lista de compras",
@@ -37,7 +43,9 @@ function App() {
       share: "Compartir",
       newList: "Lista Nueva",
       footer: "Hecho con ❤️ por Radu",
-      linkAlert: "Enlace copiado al portapapeles"
+      linkAlert: "Enlace copiado al portapapeles",
+      qty: "Cant.",
+      unit: "Unidad",
     },
   };
 
@@ -63,10 +71,22 @@ function App() {
 
   const addItem = () => {
     if (input.trim() === "") return;
-    const newItems = [...items, { text: input.trim(), bought: false }];
+    const qty = quantity.trim() === "" ? 1 : parseInt(quantity);
+    const unitValue = unit.trim();
+    const newItems = [
+      ...items,
+      {
+        text: input.trim(),
+        quantity: qty,
+        unit: unitValue,
+        bought: false,
+      },
+    ];
     setItems(newItems);
     updateList(id, newItems);
     setInput("");
+    setQuantity("");
+    setUnit("");
   };
 
   const toggleItem = (index) => {
@@ -138,6 +158,22 @@ function App() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addItem()}
           />
+          <input
+            type="number"
+            placeholder= {t.qty}
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addItem()}
+            className="quantity-input"
+          />
+          <input
+            type="text"
+            placeholder= {t.unit}
+            value={unit}
+            onChange={(e) => setUnit(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addItem()}
+            className="unit-input"
+          />
           <button onClick={addItem}>+</button>
         </div>
 
@@ -149,7 +185,12 @@ function App() {
               onClick={() => toggleItem(index)}
             >
               <input type="checkbox" checked={item.bought} readOnly />
-              <span>{item.text}</span>
+              <span>
+                {item.text}
+                {item.quantity > 1 || item.unit
+                  ? ` — ${item.quantity}${item.unit ? " " + item.unit : ""}`
+                  : ""}
+              </span>
             </li>
           ))}
         </ul>
