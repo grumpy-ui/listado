@@ -19,10 +19,11 @@ body {
 
 .app {
   background-image: repeating-linear-gradient(
-  to bottom,
-  transparent,
-  transparent 1.9rem,
-  #d3cfc7 2rem);
+    to bottom,
+    transparent,
+    transparent 2.4rem,
+    #d3cfc7 2.5rem
+  );
   max-width: 400px;
   margin: 0 auto;
   padding: 2rem 1rem;
@@ -70,8 +71,10 @@ ul.list {
 ul.list li {
   display: flex;
   align-items: center;
-  padding: 0.5rem;
-  border-bottom: 1px dashed #d3cfc7;
+  height: 2.5rem;
+  line-height: 2.5rem;
+  font-size: 1.2rem;
+  padding: 0 0.5rem;
   font-size: 1.2rem;
   cursor: pointer;
   color: #222; /* 💡 Make text darker */
