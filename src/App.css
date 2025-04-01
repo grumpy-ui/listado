@@ -22,6 +22,15 @@ body {
   z-index: -1;
 } */
 
+button,
+a {
+  color: #000 !important;              /* Force black text */
+  text-decoration: none !important;    /* Remove underline */
+  -webkit-tap-highlight-color: transparent;  /* Remove tap flash */
+  -webkit-touch-callout: none;         /* Disable iOS callout menu */
+}
+
+
 .share-bar {
   text-align: center;
   margin-bottom: 1rem;
@@ -367,12 +376,15 @@ footer {
   position: fixed;
   bottom: 1.5rem;
   left: 1.5rem;
-  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1rem;
   z-index: 9999;
   background-color: #fff8dc;
-  /* border: 2px solid #000; */
-  padding: 0.4rem 0.8rem;
-  border-radius: 50%;
+  border: 2px solid #000;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
   text-decoration: none;
   color: #000;
   font-family: 'Patrick Hand', cursive;
@@ -382,5 +394,10 @@ footer {
 
 .bmc-button:hover {
   background-color: #fff3b0;
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
+
+.bmc-text {
+  font-size: 1.1rem;
+}
+

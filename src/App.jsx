@@ -25,6 +25,7 @@ function App() {
       unitPlaceholder: "Unit",
       add: "Add",
       copyLink: "Copy Link",
+      coffee: "Buy me a coffee",
     },
     ro: {
       title: "Lista de cumpărături",
@@ -37,6 +38,7 @@ function App() {
       unitPlaceholder: "Unitate",
       add: "Adaugă",
       copyLink: "Copiază linkul",
+      coffee: "Cumpără-mi o cafea"
     },
     es: {
       title: "Lista de compras",
@@ -49,6 +51,7 @@ function App() {
       unitPlaceholder: "Unidad",
       add: "Añadir",
       copyLink: "Copiar enlace",
+      coffee: "Invítame a un café",
     },
   };
 
@@ -56,30 +59,30 @@ function App() {
   const t = translations[language];
 
   // Inside your component
-  useEffect(() => {
-    const existing = document.getElementById("bmc-wjs");
-    if (existing) return; // Prevent multiple injections
+  // useEffect(() => {
+  //   const existing = document.getElementById("bmc-wjs");
+  //   if (existing) return; // Prevent multiple injections
 
-    const script = document.createElement("script");
-    script.id = "bmc-wjs";
-    script.src = "https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js";
-    script.setAttribute("data-name", "BMC-Widget");
-    script.setAttribute("data-id", "radut");
-    script.setAttribute("data-description", "Support me on Buy me a coffee!");
-    script.setAttribute("data-message", "Buy me a coffee");
-    script.setAttribute("data-color", "#5F7FFF");
-    script.setAttribute("data-position", "Right");
-    script.setAttribute("data-x_margin", "18");
-    script.setAttribute("data-y_margin", "18");
-    script.async = true;
+  //   const script = document.createElement("script");
+  //   script.id = "bmc-wjs";
+  //   script.src = "https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js";
+  //   script.setAttribute("data-name", "BMC-Widget");
+  //   script.setAttribute("data-id", "radut");
+  //   script.setAttribute("data-description", "Support me on Buy me a coffee!");
+  //   script.setAttribute("data-message", "Buy me a coffee");
+  //   script.setAttribute("data-color", "#5F7FFF");
+  //   script.setAttribute("data-position", "Right");
+  //   script.setAttribute("data-x_margin", "18");
+  //   script.setAttribute("data-y_margin", "18");
+  //   script.async = true;
 
-    document.body.appendChild(script);
+  //   document.body.appendChild(script);
 
-    return () => {
-      const script = document.getElementById("bmc-wjs");
-      if (script) script.remove();
-    };
-  }, []);
+  //   return () => {
+  //     const script = document.getElementById("bmc-wjs");
+  //     if (script) script.remove();
+  //   };
+  // }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -298,7 +301,7 @@ function App() {
         className="bmc-button"
         aria-label="Buy me a coffee"
       >
-        ☕
+        ☕ <span className="bmc-text">{t.coffee}</span>
       </a>
     </div>
   );
