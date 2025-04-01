@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
+import { useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  createNewList,
-  getList,
-  subscribeToList,
-  updateList,
-} from "./lib/firestore";
+import { createNewList, subscribeToList, updateList } from "./lib/firestore";
 import "./App.css";
 
 function App() {
@@ -15,6 +11,8 @@ function App() {
   const [unit, setUnit] = useState("");
   const { id } = useParams();
   const navigate = useNavigate();
+  const [showShareOptions, setShowShareOptions] = useState(false);
+  const shareRef = useRef();
 
   const translations = {
     en: {
@@ -27,6 +25,7 @@ function App() {
       qtyPlaceholder: "Qty",
       unitPlaceholder: "Unit",
       add: "Add",
+      copyLink: "Copy Link",
     },
     ro: {
       title: "Lista de cumpărături",
@@ -38,6 +37,7 @@ function App() {
       qtyPlaceholder: "Cant.",
       unitPlaceholder: "Unitate",
       add: "Adaugă",
+      copyLink: "Copiază linkul",
     },
     es: {
       title: "Lista de compras",
@@ -48,7 +48,8 @@ function App() {
       linkAlert: "Enlace copiado al portapapeles",
       qtyPlaceholder: "Cant.",
       unitPlaceholder: "Unidad",
-      add: "Agregar"
+      add: "Añadir",
+      copyLink: "Copiar enlace",
     },
   };
 
@@ -71,6 +72,19 @@ function App() {
 
     return () => unsubscribe();
   }, [id, navigate]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (shareRef.current && !shareRef.current.contains(e.target)) {
+        setShowShareOptions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const sortItems = (arr) => {
     return [...arr].sort((a, b) => a.bought - b.bought);
@@ -112,23 +126,31 @@ function App() {
     updateList(id, sorted);
   };
 
-  const handleShare = () => {
-    const url = window.location.href;
+  const url = window.location.href;
+  const encodedUrl = encodeURIComponent(url);
+
+  const shareOptions = {
+    whatsapp: `https://wa.me/?text=${encodedUrl}`,
+    telegram: `https://t.me/share/url?url=${encodedUrl}`,
+    sms: `sms:?body=${encodedUrl}`,
+  };
+
+  const copyToClipboard = () => {
     navigator.clipboard
       .writeText(url)
-      .then(() => {
-        alert(t.linkAlert);
-      })
-      .catch(() => {
-        alert("Failed to copy link");
-      });
+      .then(() => alert(t.linkAlert))
+      .catch(() => alert("Failed to copy link"));
+  };
+
+  const openPopup = (link) => {
+    window.open(link, "_blank", "width=500,height=500");
   };
 
   const handleNewList = () => {
     createNewList().then((newId) => {
       navigate(`/list/${newId}`);
-      setItems([]); // clear UI immediately
-      setInput(""); // clear input
+      setItems([]);
+      setInput("");
     });
   };
 
@@ -158,13 +180,36 @@ function App() {
       <div className="container">
         <h1>{t.title}</h1>
 
-        {/* <div className="share-bar">
-          <button onClick={handleShare}>Share</button>
-        </div> */}
         <div className="controls">
           <button onClick={handleNewList}>🆕 {t.newList}</button>
-          <button onClick={handleShare}>🔗 {t.share}</button>
+          <div className="share-wrapper" ref={shareRef}>
+            <button onClick={() => setShowShareOptions(!showShareOptions)}>
+              🔗 {t.share}
+            </button>
+
+            {showShareOptions && (
+              <div className="share-options">
+                <button onClick={copyToClipboard}>📋 {t.copyLink}</button>
+                <a
+                  href={shareOptions.whatsapp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  🟢 WhatsApp
+                </a>
+                <a
+                  href={shareOptions.telegram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  🔵 Telegram
+                </a>
+                <a href={shareOptions.sms}>💬 SMS</a>
+              </div>
+            )}
+          </div>
         </div>
+
         <div className="input-bar">
           <input
             type="text"
@@ -220,8 +265,6 @@ function App() {
             </li>
           ))}
         </ul>
-
-        {/* <footer>Made with ❤️ by Radu</footer> */}
       </div>
     </div>
   );
