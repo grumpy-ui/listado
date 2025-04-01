@@ -362,3 +362,25 @@ footer {
   color: #555;
   font-size: 0.9rem;
 }
+
+.bmc-button {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  font-size: 1.8rem;
+  z-index: 9999;
+  background-color: #fff8dc;
+  /* border: 2px solid #000; */
+  padding: 0.4rem 0.8rem;
+  border-radius: 50%;
+  text-decoration: none;
+  color: #000;
+  font-family: 'Patrick Hand', cursive;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.bmc-button:hover {
+  background-color: #fff3b0;
+  transform: scale(1.1);
+}

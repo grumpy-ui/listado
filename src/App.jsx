@@ -3,7 +3,6 @@ import { useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createNewList, subscribeToList, updateList } from "./lib/firestore";
 import "./App.css";
-
 function App() {
   const [quantity, setQuantity] = useState("");
   const [items, setItems] = useState([]);
@@ -55,6 +54,32 @@ function App() {
 
   const [language, setLanguage] = useState("en");
   const t = translations[language];
+
+  // Inside your component
+  useEffect(() => {
+    const existing = document.getElementById("bmc-wjs");
+    if (existing) return; // Prevent multiple injections
+
+    const script = document.createElement("script");
+    script.id = "bmc-wjs";
+    script.src = "https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js";
+    script.setAttribute("data-name", "BMC-Widget");
+    script.setAttribute("data-id", "radut");
+    script.setAttribute("data-description", "Support me on Buy me a coffee!");
+    script.setAttribute("data-message", "Buy me a coffee");
+    script.setAttribute("data-color", "#5F7FFF");
+    script.setAttribute("data-position", "Right");
+    script.setAttribute("data-x_margin", "18");
+    script.setAttribute("data-y_margin", "18");
+    script.async = true;
+
+    document.body.appendChild(script);
+
+    return () => {
+      const script = document.getElementById("bmc-wjs");
+      if (script) script.remove();
+    };
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -266,6 +291,15 @@ function App() {
           ))}
         </ul>
       </div>
+      <a
+        href="https://www.buymeacoffee.com/radut"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="bmc-button"
+        aria-label="Buy me a coffee"
+      >
+        ☕
+      </a>
     </div>
   );
 }
