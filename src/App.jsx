@@ -294,7 +294,7 @@ function App() {
           ))}
         </ul>
       </div>
-      <a
+      {/* <a
         href="https://www.buymeacoffee.com/radut"
         target="_blank"
         rel="noopener noreferrer"
@@ -302,7 +302,7 @@ function App() {
         aria-label="Buy me a coffee"
       >
         ☕ <span className="bmc-text">{t.coffee}</span>
-      </a>
+      </a> */}
     </div>
   );
 }
