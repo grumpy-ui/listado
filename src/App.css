@@ -373,14 +373,10 @@ footer {
 }
 
 .bmc-button {
-  position: fixed;
-  bottom: 1.5rem;
-  left: 1.5rem;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   font-size: 1rem;
-  z-index: 9999;
   background-color: #fff8dc;
   border: 2px solid #000;
   padding: 0.3rem 0.6rem;
@@ -388,14 +384,16 @@ footer {
   text-decoration: none;
   color: #000;
   font-family: 'Patrick Hand', cursive;
-  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s ease, background-color 0.2s ease;
+  margin-left: auto; /* align to right inside flex */
 }
 
 .bmc-button:hover {
   background-color: #fff3b0;
   transform: scale(1.05);
 }
+
 
 .bmc-text {
   font-size: 1.1rem;

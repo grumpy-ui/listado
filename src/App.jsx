@@ -38,7 +38,7 @@ function App() {
       unitPlaceholder: "Unitate",
       add: "Adaugă",
       copyLink: "Copiază linkul",
-      coffee: "Cumpără-mi o cafea"
+      coffee: "Cumpără-mi o cafea",
     },
     es: {
       title: "Lista de compras",
@@ -170,9 +170,6 @@ function App() {
       .catch(() => alert("Failed to copy link"));
   };
 
-  const openPopup = (link) => {
-    window.open(link, "_blank", "width=500,height=500");
-  };
 
   const handleNewList = () => {
     createNewList().then((newId) => {
@@ -206,6 +203,25 @@ function App() {
       </div>
 
       <div className="container">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: "1rem",
+            marginTop: "-0.8rem",
+          }}
+        >
+          <a
+            href="https://www.buymeacoffee.com/radut"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bmc-button"
+            aria-label="Buy me a coffee"
+          >
+            ☕ <span className="bmc-text">{t.coffee}</span>
+          </a>
+        </div>
+
         <h1>{t.title}</h1>
 
         <div className="controls">
@@ -294,15 +310,6 @@ function App() {
           ))}
         </ul>
       </div>
-      {/* <a
-        href="https://www.buymeacoffee.com/radut"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="bmc-button"
-        aria-label="Buy me a coffee"
-      >
-        ☕ <span className="bmc-text">{t.coffee}</span>
-      </a> */}
     </div>
   );
 }
