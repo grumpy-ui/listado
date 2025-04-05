@@ -1,9 +1,21 @@
-import { useEffect, useState } from "react";
-import { useRef } from "react";
+import { useEffect, useState, useRef } from "react";
+import BurgerMenu from "./BurgerMenu";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  auth,
+  googleProvider,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+} from "./firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import { createNewList, subscribeToList, updateList } from "./lib/firestore";
 import "./App.css";
+
 function App() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const [quantity, setQuantity] = useState("");
   const [items, setItems] = useState([]);
   const [input, setInput] = useState("");
@@ -19,78 +31,75 @@ function App() {
       placeholder: "Add item...",
       share: "Share",
       newList: "New List",
-      footer: "Made with ❤️ by Radu",
       linkAlert: "Link copied to clipboard",
       qtyPlaceholder: "Qty",
       unitPlaceholder: "Unit",
       add: "Add",
       copyLink: "Copy Link",
-      coffee: "Buy me a coffee",
     },
     ro: {
       title: "Lista de cumpărături",
       placeholder: "Adaugă produs...",
       share: "Trimite",
       newList: "Listă Nouă",
-      footer: "Făcut cu ❤️ de Radu",
       linkAlert: "Link copiat in clipboard",
       qtyPlaceholder: "Cant.",
       unitPlaceholder: "Unitate",
       add: "Adaugă",
       copyLink: "Copiază linkul",
-      coffee: "Cumpără-mi o cafea"
     },
     es: {
       title: "Lista de compras",
       placeholder: "Agregar producto...",
       share: "Compartir",
       newList: "Lista Nueva",
-      footer: "Hecho con ❤️ por Radu",
       linkAlert: "Enlace copiado al portapapeles",
       qtyPlaceholder: "Cant.",
       unitPlaceholder: "Unidad",
       add: "Añadir",
       copyLink: "Copiar enlace",
-      coffee: "Invítame a un café",
     },
   };
 
   const [language, setLanguage] = useState("en");
   const t = translations[language];
 
-  // Inside your component
-  // useEffect(() => {
-  //   const existing = document.getElementById("bmc-wjs");
-  //   if (existing) return; // Prevent multiple injections
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
 
-  //   const script = document.createElement("script");
-  //   script.id = "bmc-wjs";
-  //   script.src = "https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js";
-  //   script.setAttribute("data-name", "BMC-Widget");
-  //   script.setAttribute("data-id", "radut");
-  //   script.setAttribute("data-description", "Support me on Buy me a coffee!");
-  //   script.setAttribute("data-message", "Buy me a coffee");
-  //   script.setAttribute("data-color", "#5F7FFF");
-  //   script.setAttribute("data-position", "Right");
-  //   script.setAttribute("data-x_margin", "18");
-  //   script.setAttribute("data-y_margin", "18");
-  //   script.async = true;
+    return () => unsubscribe();
+  }, []);
 
-  //   document.body.appendChild(script);
+  const handleLogin = async (email, password, isLogin) => {
+    if (email && password) {
+      try {
+        if (isLogin) {
+          await signInWithEmailAndPassword(auth, email, password);
+        } else {
+          await createUserWithEmailAndPassword(auth, email, password);
+        }
+        setIsMenuOpen(false);
+      } catch (error) {
+        alert(error.message);
+      }
+    } else {
+      signInWithPopup(auth, googleProvider).catch((error) =>
+        alert(error.message)
+      );
+    }
+  };
 
-  //   return () => {
-  //     const script = document.getElementById("bmc-wjs");
-  //     if (script) script.remove();
-  //   };
-  // }, []);
+  const handleLogout = () => {
+    signOut(auth);
+  };
 
   useEffect(() => {
     if (!id) return;
 
     if (id === "new") {
-      createNewList().then((newId) => {
-        navigate(`/list/${newId}`);
-      });
+      createNewList().then((newId) => navigate(`/list/${newId}`));
       return;
     }
 
@@ -109,54 +118,46 @@ function App() {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const sortItems = (arr) => {
-    return [...arr].sort((a, b) => a.bought - b.bought);
-  };
+  const sortItems = (arr) => [...arr].sort((a, b) => a.bought - b.bought);
 
   const addItem = () => {
-    if (input.trim() === "") return;
-    const qty = quantity.trim() === "" ? 1 : parseInt(quantity);
-    const unitValue = unit.trim();
-    const newItems = sortItems([
-      ...items,
-      {
-        text: input.trim(),
-        quantity: qty,
-        unit: unitValue,
-        bought: false,
-      },
-    ]);
-    setItems(newItems);
-    updateList(id, newItems);
+    if (!input.trim()) return;
 
+    const newItem = {
+      text: input.trim(),
+      quantity: quantity.trim() ? parseInt(quantity) : 1,
+      unit: unit.trim(),
+      bought: false,
+    };
+
+    const updatedItems = sortItems([...items, newItem]);
+    setItems(updatedItems);
+    updateList(id, updatedItems);
     setInput("");
     setQuantity("");
     setUnit("");
   };
 
   const toggleItem = (index) => {
-    const newItems = [...items];
-    newItems[index].bought = !newItems[index].bought;
+    const newItems = items.map((item, i) =>
+      i === index ? { ...item, bought: !item.bought } : item
+    );
     const sorted = sortItems(newItems);
     setItems(sorted);
     updateList(id, sorted);
   };
 
   const handleDeleteItem = (index) => {
-    const newItems = items.filter((_, i) => i !== index);
-    const sorted = sortItems(newItems);
-    setItems(sorted);
-    updateList(id, sorted);
+    const updatedItems = items.filter((_, i) => i !== index);
+    setItems(updatedItems);
+    updateList(id, updatedItems);
   };
 
   const url = window.location.href;
   const encodedUrl = encodeURIComponent(url);
-
   const shareOptions = {
     whatsapp: `https://wa.me/?text=${encodedUrl}`,
     telegram: `https://t.me/share/url?url=${encodedUrl}`,
@@ -170,10 +171,6 @@ function App() {
       .catch(() => alert("Failed to copy link"));
   };
 
-  const openPopup = (link) => {
-    window.open(link, "_blank", "width=500,height=500");
-  };
-
   const handleNewList = () => {
     createNewList().then((newId) => {
       navigate(`/list/${newId}`);
@@ -184,54 +181,23 @@ function App() {
 
   return (
     <div className="app">
-      <div className="language-selector">
-        <button
-          onClick={() => setLanguage("en")}
-          className={language === "en" ? "active" : ""}
-        >
-          🇬🇧
-        </button>
-        <button
-          onClick={() => setLanguage("ro")}
-          className={language === "ro" ? "active" : ""}
-        >
-          🇷🇴
-        </button>
-        <button
-          onClick={() => setLanguage("es")}
-          className={language === "es" ? "active" : ""}
-        >
-          🇪🇸
-        </button>
+      <div className="burger-icon">
+        <button onClick={() => setIsMenuOpen(true)}>🍔</button>
       </div>
 
       <div className="container">
         <h1>{t.title}</h1>
-
         <div className="controls">
           <button onClick={handleNewList}>🆕 {t.newList}</button>
           <div className="share-wrapper" ref={shareRef}>
-            <button onClick={() => setShowShareOptions(!showShareOptions)}>
+            <button onClick={() => setShowShareOptions((prev) => !prev)}>
               🔗 {t.share}
             </button>
-
             {showShareOptions && (
               <div className="share-options">
                 <button onClick={copyToClipboard}>📋 {t.copyLink}</button>
-                <a
-                  href={shareOptions.whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  🟢 WhatsApp
-                </a>
-                <a
-                  href={shareOptions.telegram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  🔵 Telegram
-                </a>
+                <a href={shareOptions.whatsapp} target="_blank" rel="noopener noreferrer">🟢 WhatsApp</a>
+                <a href={shareOptions.telegram} target="_blank" rel="noopener noreferrer">🔵 Telegram</a>
                 <a href={shareOptions.sms}>💬 SMS</a>
               </div>
             )}
@@ -239,70 +205,36 @@ function App() {
         </div>
 
         <div className="input-bar">
-          <input
-            type="text"
-            placeholder={t.placeholder}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addItem()}
-            className="item-name-input"
-          />
-
+          <input type="text" placeholder={t.placeholder} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addItem()} />
           <div className="input-row">
-            <input
-              type="number"
-              placeholder={t.qtyPlaceholder}
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addItem()}
-              className="quantity-input"
-            />
-            <input
-              type="text"
-              placeholder={t.unitPlaceholder}
-              value={unit}
-              onChange={(e) => setUnit(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addItem()}
-              className="unit-input"
-            />
+            <input type="number" placeholder={t.qtyPlaceholder} value={quantity} onChange={(e) => setQuantity(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addItem()} />
+            <input type="text" placeholder={t.unitPlaceholder} value={unit} onChange={(e) => setUnit(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addItem()} />
           </div>
-
-          <button className="add-button" onClick={addItem}>
-            {t.add}
-          </button>
+          <button className="add-button" onClick={addItem}>{t.add}</button>
         </div>
 
         <ul className="list">
           {items.map((item, index) => (
             <li key={index} className={item.bought ? "bought" : ""}>
-              <div className="item-content" onClick={() => toggleItem(index)}>
+              <div onClick={() => toggleItem(index)}>
                 <input type="checkbox" checked={item.bought} readOnly />
-                <span>
-                  {item.text}
-                  {item.quantity > 1 || item.unit
-                    ? ` — ${item.quantity}${item.unit ? " " + item.unit : ""}`
-                    : ""}
-                </span>
+                <span>{item.text}{item.quantity > 1 || item.unit ? ` — ${item.quantity} ${item.unit || ""}` : ""}</span>
               </div>
-              <button
-                className="delete-button"
-                onClick={() => handleDeleteItem(index)}
-              >
-                🗑️
-              </button>
+              <button className="delete-button" onClick={() => handleDeleteItem(index)}>🗑️</button>
             </li>
           ))}
         </ul>
       </div>
-      <a
-        href="https://www.buymeacoffee.com/radut"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="bmc-button"
-        aria-label="Buy me a coffee"
-      >
-        ☕ <span className="bmc-text">{t.coffee}</span>
-      </a>
+
+      <BurgerMenu
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        language={language}
+        setLanguage={setLanguage}
+        handleLogin={handleLogin}
+        handleLogout={handleLogout}
+        user={user}
+      />
     </div>
   );
 }
