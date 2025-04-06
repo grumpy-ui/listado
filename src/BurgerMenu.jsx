@@ -8,7 +8,14 @@ import {
   googleProvider,
 } from "./firebase";
 
-const BurgerMenu = ({ isOpen, onClose, language, setLanguage, user }) => {
+const BurgerMenu = ({
+  isOpen,
+  onClose,
+  language,
+  setLanguage,
+  user,
+  handleLogout,
+}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true); // Toggle between login/register
@@ -42,8 +49,17 @@ const BurgerMenu = ({ isOpen, onClose, language, setLanguage, user }) => {
       </button>
 
       {user ? (
-        <div className="menu-section">
+        <div className="menu-section auth-section">
           <span className="logged-in-msg">👤 Logged in as {user.email}</span>
+          <button
+            className="menu-btn login-btn"
+            onClick={() => {
+              handleLogout();
+              onClose();
+            }}
+          >
+            🚪 Log Out
+          </button>
         </div>
       ) : (
         <div className="menu-section auth-section">
@@ -84,9 +100,24 @@ const BurgerMenu = ({ isOpen, onClose, language, setLanguage, user }) => {
       <div className="menu-section">
         <span className="menu-label">🌐 Language:</span>
         <div className="language-options">
-          <button className={`lang-btn ${language === "en" ? "active" : ""}`} onClick={() => setLanguage("en")}>🇬🇧</button>
-          <button className={`lang-btn ${language === "ro" ? "active" : ""}`} onClick={() => setLanguage("ro")}>🇷🇴</button>
-          <button className={`lang-btn ${language === "es" ? "active" : ""}`} onClick={() => setLanguage("es")}>🇪🇸</button>
+          <button
+            className={`lang-btn ${language === "en" ? "active" : ""}`}
+            onClick={() => setLanguage("en")}
+          >
+            🇬🇧
+          </button>
+          <button
+            className={`lang-btn ${language === "ro" ? "active" : ""}`}
+            onClick={() => setLanguage("ro")}
+          >
+            🇷🇴
+          </button>
+          <button
+            className={`lang-btn ${language === "es" ? "active" : ""}`}
+            onClick={() => setLanguage("es")}
+          >
+            🇪🇸
+          </button>
         </div>
       </div>
 
