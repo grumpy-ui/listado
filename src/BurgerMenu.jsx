@@ -6,8 +6,9 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   googleProvider,
+  signOut,
 } from "./firebase";
-
+import { sendEmailVerification } from "firebase/auth";
 const BurgerMenu = ({
   isOpen,
   onClose,
@@ -23,13 +24,41 @@ const BurgerMenu = ({
   const handleEmailAuth = async () => {
     try {
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+
+        if (!userCredential.user.emailVerified) {
+          alert("Please verify your email first. Check your inbox.");
+          await signOut(auth);
+        } else {
+          onClose();
+        }
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+        await sendEmailVerification(userCredential.user); // <-- send verification email
+        alert("Verification email sent! Please check your inbox.");
+        await signOut(auth); // log out user until email verified
+        onClose();
       }
-      onClose();
     } catch (err) {
-      alert(err.message);
+      if (err.code === "auth/email-already-in-use") {
+        alert("This email is already in use. Please log in instead.");
+      } else if (err.code === "auth/invalid-email") {
+        alert("Please enter a valid email address.");
+      } else if (err.code === "auth/weak-password") {
+        alert("Your password should be at least 6 characters.");
+      } else if (err.code === "auth/invalid-login-credentials") {
+        alert("Invalid credentials, please try again.");
+      } else {
+        alert(err.message);
+      }
     }
   };
 
@@ -86,9 +115,10 @@ const BurgerMenu = ({
           <button className="menu-btn login-btn" onClick={handleEmailAuth}>
             {isLogin ? "🔑 Log In" : "📝 Register"}
           </button>
-          <button className="toggle-auth" onClick={() => setIsLogin(!isLogin)}>
+          <button className="menu-btn" onClick={() => setIsLogin(!isLogin)}>
             {isLogin ? "Create new account" : "Already have an account?"}
           </button>
+          <div className="warning-msg"></div>
         </div>
       )}
 
