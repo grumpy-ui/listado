@@ -1,14 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import "./BurgerMenu.css";
-import {
-  auth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  googleProvider,
-  signOut,
-} from "./firebase";
-import { sendEmailVerification } from "firebase/auth";
+
 const BurgerMenu = ({
   isOpen,
   onClose,
@@ -16,111 +8,38 @@ const BurgerMenu = ({
   setLanguage,
   user,
   handleLogout,
+  setIsAuthOpen,
 }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLogin, setIsLogin] = useState(true); // Toggle between login/register
-
-  const handleEmailAuth = async () => {
-    try {
-      if (isLogin) {
-        const userCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-
-        if (!userCredential.user.emailVerified) {
-          alert("Please verify your email first. Check your inbox.");
-          await signOut(auth);
-        } else {
-          onClose();
-        }
-      } else {
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-        await sendEmailVerification(userCredential.user); // <-- send verification email
-        alert("Verification email sent! Please check your inbox.");
-        await signOut(auth); // log out user until email verified
-        onClose();
-      }
-    } catch (err) {
-      if (err.code === "auth/email-already-in-use") {
-        alert("This email is already in use. Please log in instead.");
-      } else if (err.code === "auth/invalid-email") {
-        alert("Please enter a valid email address.");
-      } else if (err.code === "auth/weak-password") {
-        alert("Your password should be at least 6 characters.");
-      } else if (err.code === "auth/invalid-login-credentials") {
-        alert("Invalid credentials, please try again.");
-      } else {
-        alert(err.message);
-      }
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    try {
-      await signInWithPopup(auth, googleProvider);
-      onClose();
-    } catch (err) {
-      alert(err.message);
-    }
-  };
-
   return (
     <div className={`burger-menu ${isOpen ? "open" : ""}`}>
-      <button className="close-btn" onClick={onClose}>
-        ✖
-      </button>
+      <button className="close-btn" onClick={onClose}>✖</button>
 
-      {user ? (
-        <div className="menu-section auth-section">
-          <span className="logged-in-msg">👤 Logged in as {user.email}</span>
+      <div className="menu-section auth-section">
+        {user ? (
+          <>
+            <span className="logged-in-msg">👤 Logged in as {user.email}</span>
+            <button
+              className="menu-btn login-btn"
+              onClick={() => {
+                handleLogout();
+                onClose();
+              }}
+            >
+              🚪 Log Out
+            </button>
+          </>
+        ) : (
           <button
             className="menu-btn login-btn"
             onClick={() => {
-              handleLogout();
               onClose();
+              setIsAuthOpen(true);
             }}
           >
-            🚪 Log Out
+            👤 Login / Register
           </button>
-        </div>
-      ) : (
-        <div className="menu-section auth-section">
-          <button className="menu-btn google-btn" onClick={handleGoogleLogin}>
-            🔑 Continue with Google
-          </button>
-
-          <div className="divider">or</div>
-
-          <input
-            type="email"
-            placeholder="Email"
-            className="menu-input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="menu-input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button className="menu-btn login-btn" onClick={handleEmailAuth}>
-            {isLogin ? "🔑 Log In" : "📝 Register"}
-          </button>
-          <button className="menu-btn" onClick={() => setIsLogin(!isLogin)}>
-            {isLogin ? "Create new account" : "Already have an account?"}
-          </button>
-          <div className="warning-msg"></div>
-        </div>
-      )}
+        )}
+      </div>
 
       <div className="menu-section">
         <button className="menu-btn hide">📜 History</button>

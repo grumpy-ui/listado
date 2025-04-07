@@ -1,20 +1,15 @@
 import { useEffect, useState, useRef } from "react";
 import BurgerMenu from "./BurgerMenu";
+import AuthPopup from "./AuthPopup";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  auth,
-  googleProvider,
-  signInWithPopup,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-} from "./firebase";
+import { auth, signOut } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { createNewList, subscribeToList, updateList } from "./lib/firestore";
 import "./App.css";
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [quantity, setQuantity] = useState("");
   const [items, setItems] = useState([]);
@@ -68,45 +63,18 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
     });
-
     return () => unsubscribe();
   }, []);
 
-  const handleLogin = async (email, password, isLogin) => {
-    if (email && password) {
-      try {
-        if (isLogin) {
-          await signInWithEmailAndPassword(auth, email, password);
-        } else {
-          await createUserWithEmailAndPassword(auth, email, password);
-        }
-        setIsMenuOpen(false);
-      } catch (error) {
-        alert(error.message);
-      }
-    } else {
-      signInWithPopup(auth, googleProvider).catch((error) =>
-        alert(error.message)
-      );
-    }
-  };
-
-  const handleLogout = () => {
-    signOut(auth);
-  };
-
   useEffect(() => {
     if (!id) return;
-
     if (id === "new") {
       createNewList().then((newId) => navigate(`/list/${newId}`));
       return;
     }
-
-    const unsubscribe = subscribeToList(id, (data) => {
-      setItems(data.items || []);
-    });
-
+    const unsubscribe = subscribeToList(id, (data) =>
+      setItems(data.items || [])
+    );
     return () => unsubscribe();
   }, [id, navigate]);
 
@@ -116,7 +84,6 @@ function App() {
         setShowShareOptions(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -125,14 +92,12 @@ function App() {
 
   const addItem = () => {
     if (!input.trim()) return;
-
     const newItem = {
       text: input.trim(),
       quantity: quantity.trim() ? parseInt(quantity) : 1,
       unit: unit.trim(),
       bought: false,
     };
-
     const updatedItems = sortItems([...items, newItem]);
     setItems(updatedItems);
     updateList(id, updatedItems);
@@ -156,17 +121,9 @@ function App() {
     updateList(id, updatedItems);
   };
 
-  const url = window.location.href;
-  const encodedUrl = encodeURIComponent(url);
-  const shareOptions = {
-    whatsapp: `https://wa.me/?text=${encodedUrl}`,
-    telegram: `https://t.me/share/url?url=${encodedUrl}`,
-    sms: `sms:?body=${encodedUrl}`,
-  };
-
   const copyToClipboard = () => {
     navigator.clipboard
-      .writeText(url)
+      .writeText(window.location.href)
       .then(() => alert(t.linkAlert))
       .catch(() => alert("Failed to copy link"));
   };
@@ -196,21 +153,61 @@ function App() {
             {showShareOptions && (
               <div className="share-options">
                 <button onClick={copyToClipboard}>📋 {t.copyLink}</button>
-                <a href={shareOptions.whatsapp} target="_blank" rel="noopener noreferrer">🟢 WhatsApp</a>
-                <a href={shareOptions.telegram} target="_blank" rel="noopener noreferrer">🔵 Telegram</a>
-                <a href={shareOptions.sms}>💬 SMS</a>
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(
+                    window.location.href
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  🟢 WhatsApp
+                </a>
+                <a
+                  href={`https://t.me/share/url?url=${encodeURIComponent(
+                    window.location.href
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  🔵 Telegram
+                </a>
+                <a
+                  href={`sms:?body=${encodeURIComponent(window.location.href)}`}
+                >
+                  💬 SMS
+                </a>
               </div>
             )}
           </div>
         </div>
 
         <div className="input-bar">
-          <input type="text" placeholder={t.placeholder} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addItem()} />
+          <input
+            type="text"
+            placeholder={t.placeholder}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addItem()}
+          />
           <div className="input-row">
-            <input type="number" placeholder={t.qtyPlaceholder} value={quantity} onChange={(e) => setQuantity(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addItem()} />
-            <input type="text" placeholder={t.unitPlaceholder} value={unit} onChange={(e) => setUnit(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addItem()} />
+            <input
+              type="number"
+              placeholder={t.qtyPlaceholder}
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addItem()}
+            />
+            <input
+              type="text"
+              placeholder={t.unitPlaceholder}
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addItem()}
+            />
           </div>
-          <button className="add-button" onClick={addItem}>{t.add}</button>
+          <button className="add-button" onClick={addItem}>
+            {t.add}
+          </button>
         </div>
 
         <ul className="list">
@@ -218,9 +215,19 @@ function App() {
             <li key={index} className={item.bought ? "bought" : ""}>
               <div onClick={() => toggleItem(index)}>
                 <input type="checkbox" checked={item.bought} readOnly />
-                <span>{item.text}{item.quantity > 1 || item.unit ? ` — ${item.quantity} ${item.unit || ""}` : ""}</span>
+                <span>
+                  {item.text}
+                  {item.quantity > 1 || item.unit
+                    ? ` — ${item.quantity} ${item.unit || ""}`
+                    : ""}
+                </span>
               </div>
-              <button className="delete-button" onClick={() => handleDeleteItem(index)}>🗑️</button>
+              <button
+                className="delete-button"
+                onClick={() => handleDeleteItem(index)}
+              >
+                🗑️
+              </button>
             </li>
           ))}
         </ul>
@@ -231,10 +238,14 @@ function App() {
         onClose={() => setIsMenuOpen(false)}
         language={language}
         setLanguage={setLanguage}
-        handleLogin={handleLogin}
-        handleLogout={handleLogout}
+        handleLogout={() => signOut(auth)}
         user={user}
+        setIsAuthOpen={setIsAuthOpen}
       />
+
+      {isAuthOpen && (
+        <AuthPopup onClose={() => setIsAuthOpen(false)} setUser={setUser} />
+      )}
     </div>
   );
 }
