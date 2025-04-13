@@ -61,8 +61,18 @@ function App() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+      const isVerified =
+        user?.emailVerified ||
+        user?.providerData[0]?.providerId !== "password";
+
+      if (user && isVerified) {
+        setUser(user);
+      } else {
+        setUser(null);
+        if (user) signOut(auth); // Force sign-out if unverified
+      }
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -171,9 +181,7 @@ function App() {
                 >
                   🔵 Telegram
                 </a>
-                <a
-                  href={`sms:?body=${encodeURIComponent(window.location.href)}`}
-                >
+                <a href={`sms:?body=${encodeURIComponent(window.location.href)}`}>
                   💬 SMS
                 </a>
               </div>
