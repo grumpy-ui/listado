@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createNewList, subscribeToList, updateList } from "./lib/firestore";
-import { onAuthStateChange, getCurrentUser } from "./lib/auth";
+import {
+  onAuthStateChange,
+  getCurrentUser,
+  handleRedirectResult,
+} from "./lib/auth";
 import Account from "./components/Account";
 import ListHistory from "./components/ListHistory";
 import NewListModal from "./components/NewListModal";
@@ -222,6 +226,9 @@ function App() {
   // }, []);
 
   useEffect(() => {
+    // Handle any pending redirect results (for mobile Google sign-in)
+    handleRedirectResult().catch(console.error);
+
     // Listen to authentication state changes
     const unsubscribeAuth = onAuthStateChange((user) => {
       setUser(user);
