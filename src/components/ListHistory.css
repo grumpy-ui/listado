@@ -1,0 +1,266 @@
+.list-history-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+.list-history-content {
+  background-color: #fff8dc;
+  border: 2px solid #000;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
+}
+
+.list-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 2px solid #000;
+  background-color: #fff;
+  border-radius: 10px 10px 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.list-history-header h2 {
+  margin: 0;
+  font-family: "Patrick Hand", cursive;
+  font-size: 1.8rem;
+  color: #222;
+}
+
+.list-history-body {
+  padding: 1.5rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  font-family: "Patrick Hand", cursive;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 1rem;
+  border-radius: 8px;
+  font-family: "Patrick Hand", cursive;
+  font-size: 1rem;
+  border: 1px solid #ffcdd2;
+  text-align: center;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+}
+
+.empty-state p {
+  font-family: "Patrick Hand", cursive;
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.lists-header {
+  margin-bottom: 1.5rem;
+  text-align: right;
+}
+
+.new-list-button {
+  background-color: #5f7fff;
+  color: white;
+  border: 2px solid #5f7fff;
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  font-family: "Patrick Hand", cursive;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.new-list-button:hover {
+  background-color: #4a6bff;
+  transform: translateY(-2px);
+}
+
+.lists-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.list-item {
+  background-color: #fff;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.list-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.list-info {
+  margin-bottom: 1rem;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.list-header h3 {
+  margin: 0;
+  font-family: "Patrick Hand", cursive;
+  font-size: 1.3rem;
+  color: #222;
+}
+
+.item-count {
+  background-color: #f0f0f0;
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  font-family: "Patrick Hand", cursive;
+  font-size: 0.9rem;
+  color: #666;
+  border: 1px solid #ddd;
+}
+
+.list-dates {
+  font-family: "Patrick Hand", cursive;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.list-dates p {
+  margin: 0.2rem 0;
+}
+
+.created-date {
+  color: #4caf50;
+}
+
+.updated-date {
+  color: #ff9800;
+}
+
+.list-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.view-button,
+.delete-button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-family: "Patrick Hand", cursive;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid;
+}
+
+.view-button {
+  background-color: #4caf50;
+  color: white;
+  border-color: #4caf50;
+}
+
+.view-button:hover {
+  background-color: #45a049;
+  transform: translateY(-1px);
+}
+
+.delete-button {
+  background-color: #ff6b6b;
+  color: white;
+  border-color: #ff6b6b;
+}
+
+.delete-button:hover {
+  background-color: #ff5252;
+  transform: translateY(-1px);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .list-history-content {
+    width: 95%;
+    margin: 1rem;
+  }
+  
+  .list-history-header {
+    padding: 1rem;
+  }
+  
+  .list-history-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .list-history-body {
+    padding: 1rem;
+  }
+  
+  .list-item {
+    padding: 0.8rem;
+  }
+  
+  .list-header h3 {
+    font-size: 1.1rem;
+  }
+  
+  .list-actions {
+    flex-direction: column;
+  }
+  
+  .view-button,
+  .delete-button {
+    width: 100%;
+    padding: 0.6rem;
+  }
+}

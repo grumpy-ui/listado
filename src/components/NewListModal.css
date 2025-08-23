@@ -1,0 +1,182 @@
+.new-list-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+.new-list-content {
+  background-color: #fff8dc;
+  border: 2px solid #000;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
+}
+
+.new-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 2px solid #000;
+  background-color: #fff;
+  border-radius: 10px 10px 0 0;
+}
+
+.new-list-header h2 {
+  margin: 0;
+  font-family: "Patrick Hand", cursive;
+  font-size: 1.8rem;
+  color: #222;
+}
+
+.new-list-form {
+  padding: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-family: "Patrick Hand", cursive;
+  font-size: 1.1rem;
+  color: #222;
+  font-weight: bold;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #000;
+  border-radius: 8px;
+  font-family: "Patrick Hand", cursive;
+  font-size: 1rem;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #5f7fff;
+  box-shadow: 0 0 0 3px rgba(95, 127, 255, 0.1);
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 0.8rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-family: "Patrick Hand", cursive;
+  font-size: 0.9rem;
+  border: 1px solid #ffcdd2;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.cancel-button,
+.create-button {
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-family: "Patrick Hand", cursive;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid;
+}
+
+.cancel-button {
+  background-color: #fff;
+  color: #666;
+  border-color: #ccc;
+}
+
+.cancel-button:hover:not(:disabled) {
+  background-color: #f5f5f5;
+  border-color: #999;
+}
+
+.create-button {
+  background-color: #5f7fff;
+  color: white;
+  border-color: #5f7fff;
+}
+
+.create-button:hover:not(:disabled) {
+  background-color: #4a6bff;
+  transform: translateY(-2px);
+}
+
+.cancel-button:disabled,
+.create-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .new-list-content {
+    width: 95%;
+    margin: 1rem;
+  }
+
+  .new-list-header {
+    padding: 1rem;
+  }
+
+  .new-list-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .new-list-form {
+    padding: 1rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .cancel-button,
+  .create-button {
+    width: 100%;
+  }
+}

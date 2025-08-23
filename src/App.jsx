@@ -2,7 +2,115 @@ import { useEffect, useState } from "react";
 import { useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createNewList, subscribeToList, updateList } from "./lib/firestore";
+import { onAuthStateChange, getCurrentUser } from "./lib/auth";
+import Account from "./components/Account";
+import ListHistory from "./components/ListHistory";
+import NewListModal from "./components/NewListModal";
 import "./App.css";
+
+// Burger Menu Component
+function BurgerMenu({
+  isOpen,
+  onClose,
+  language,
+  onAccountClick,
+  onHistoryClick,
+  user,
+}) {
+  const translations = {
+    en: {
+      account: "Account",
+      listHistory: "List History",
+      options: "Options",
+      coffee: "Buy me a coffee",
+    },
+    ro: {
+      account: "Cont",
+      listHistory: "Istoric liste",
+      options: "Opțiuni",
+      coffee: "Cumpără-mi o cafea",
+    },
+    es: {
+      account: "Cuenta",
+      listHistory: "Historial de listas",
+      options: "Opciones",
+      coffee: "Invítame a un café",
+    },
+  };
+
+  const t = translations[language];
+
+  const handleMenuClick = (action) => {
+    // Handle menu item clicks
+    switch (action) {
+      case "account":
+        onAccountClick();
+        break;
+      case "history":
+        onHistoryClick();
+        break;
+      case "options":
+        alert("Options functionality coming soon!");
+        break;
+      default:
+        break;
+    }
+    onClose();
+  };
+
+  return (
+    <>
+      {/* Overlay */}
+      {isOpen && <div className="menu-overlay" onClick={onClose}></div>}
+
+      {/* Menu */}
+      <div className={`burger-menu ${isOpen ? "open" : ""}`}>
+        <div className="menu-header">
+          <h3>Menu</h3>
+          <button className="close-button" onClick={onClose}>
+            ✕
+          </button>
+        </div>
+
+        <div className="menu-items">
+          <button
+            className="menu-item"
+            onClick={() => handleMenuClick("account")}
+          >
+            👤 {user ? user.email : t.account}
+          </button>
+
+          <button
+            className="menu-item"
+            onClick={() => handleMenuClick("history")}
+          >
+            📋 {t.listHistory}
+          </button>
+
+          <button
+            className="menu-item"
+            onClick={() => handleMenuClick("options")}
+          >
+            ⚙️ {t.options}
+          </button>
+
+          <div className="menu-divider"></div>
+
+          <a
+            href="https://www.buymeacoffee.com/radut"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="menu-item bmc-menu-item"
+            aria-label="Buy me a coffee"
+          >
+            ☕ {t.coffee}
+          </a>
+        </div>
+      </div>
+    </>
+  );
+}
+
 function App() {
   const [quantity, setQuantity] = useState("");
   const [items, setItems] = useState([]);
@@ -11,6 +119,14 @@ function App() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [showShareOptions, setShowShareOptions] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showAccount, setShowAccount] = useState(false);
+  const [showListHistory, setShowListHistory] = useState(false);
+  const [showNewListModal, setShowNewListModal] = useState(false);
+  const [user, setUser] = useState(null);
+  const [currentList, setCurrentList] = useState(null);
+  const [listBelongsToUser, setListBelongsToUser] = useState(false);
+  const [justCreatedList, setJustCreatedList] = useState(false);
   const shareRef = useRef();
 
   const translations = {
@@ -26,6 +142,13 @@ function App() {
       add: "Add",
       copyLink: "Copy Link",
       coffee: "Buy me a coffee",
+      createNewList: "Create New List",
+      listName: "List Name",
+      listNamePlaceholder: "Enter list name...",
+      create: "Create",
+      welcomeMessage: "Welcome! Create a new list to get started.",
+      noListSelected:
+        "Please select a list from your history or create a new one.",
     },
     ro: {
       title: "Lista de cumpărături",
@@ -39,6 +162,13 @@ function App() {
       add: "Adaugă",
       copyLink: "Copiază linkul",
       coffee: "Cumpără-mi o cafea",
+      createNewList: "Creează listă nouă",
+      listName: "Numele listei",
+      listNamePlaceholder: "Introdu numele listei...",
+      create: "Creează",
+      welcomeMessage: "Bun venit! Creează o listă nouă pentru a începe.",
+      noListSelected:
+        "Te rog selectează o listă din istoric sau creează una nouă.",
     },
     es: {
       title: "Lista de compras",
@@ -52,6 +182,13 @@ function App() {
       add: "Añadir",
       copyLink: "Copiar enlace",
       coffee: "Invítame a un café",
+      createNewList: "Crear nueva lista",
+      listName: "Nombre de la lista",
+      listNamePlaceholder: "Ingresa el nombre de la lista...",
+      create: "Crear",
+      welcomeMessage: "¡Bienvenido! Crea una nueva lista para comenzar.",
+      noListSelected:
+        "Por favor selecciona una lista de tu historial o crea una nueva.",
     },
   };
 
@@ -85,21 +222,107 @@ function App() {
   // }, []);
 
   useEffect(() => {
+    // Listen to authentication state changes
+    const unsubscribeAuth = onAuthStateChange((user) => {
+      setUser(user);
+
+      // Reset list ownership when user changes
+      if (!user) {
+        setListBelongsToUser(false);
+        setCurrentList(null);
+        setItems([]);
+        // Create a new anonymous list when user logs out
+        createNewList().then((newId) => {
+          // Update the URL without triggering navigation
+          window.history.replaceState(null, "", `/list/${newId}`);
+        });
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
+
+  // Redirect logged-in users to "new" route if they don't have access to the current list
+  useEffect(() => {
+    // Only redirect logged-in users who don't have access to the current list
+    if (
+      user &&
+      id &&
+      id !== "new" &&
+      !listBelongsToUser &&
+      currentList &&
+      !justCreatedList
+    ) {
+      // Logged-in user doesn't have access to this list
+      // Redirect to "new" route
+      navigate("/list/new");
+    }
+  }, [user, id, listBelongsToUser, navigate, currentList, justCreatedList]);
+
+  // Reset justCreatedList flag when user changes or when on "new" route
+  useEffect(() => {
+    if (!user || id === "new") {
+      setJustCreatedList(false);
+    }
+  }, [user, id]);
+
+  useEffect(() => {
     if (!id) return;
 
     if (id === "new") {
+      // For logged-in users, just stay on the "new" route to show welcome state
+      if (user) {
+        setItems([]);
+        setInput("");
+        setQuantity("");
+        setUnit("");
+        setCurrentList(null);
+        setListBelongsToUser(false);
+        return;
+      }
+      // For non-logged-in users, create anonymous list
       createNewList().then((newId) => {
         navigate(`/list/${newId}`);
       });
       return;
     }
 
-    const unsubscribe = subscribeToList(id, (data) => {
-      setItems(data.items || []);
-    });
+    let unsubscribe = () => {};
 
-    return () => unsubscribe();
-  }, [id, navigate]);
+    try {
+      unsubscribe = subscribeToList(id, (data) => {
+        if (data) {
+          setItems(data.items || []);
+          setCurrentList(data);
+
+          // Check if the list belongs to the current user
+          if (user && data.userId) {
+            const belongsToUser = data.userId === user.uid;
+            setListBelongsToUser(belongsToUser);
+          } else {
+            setListBelongsToUser(false);
+          }
+        } else {
+          setItems([]);
+          setCurrentList(null);
+          setListBelongsToUser(false);
+        }
+      });
+    } catch (error) {
+      console.error("Error setting up list subscription:", error);
+      setItems([]);
+      setCurrentList(null);
+      setListBelongsToUser(false);
+    }
+
+    return () => {
+      try {
+        unsubscribe();
+      } catch (error) {
+        console.error("Error unsubscribing from list:", error);
+      }
+    };
+  }, [id, navigate, user]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -170,8 +393,13 @@ function App() {
       .catch(() => alert("Failed to copy link"));
   };
 
-
   const handleNewList = () => {
+    // For logged-in users, show the new list modal
+    if (user) {
+      setShowNewListModal(true);
+      return;
+    }
+    // For non-logged-in users, create anonymous list
     createNewList().then((newId) => {
       navigate(`/list/${newId}`);
       setItems([]);
@@ -181,6 +409,53 @@ function App() {
 
   return (
     <div className="app">
+      {/* Burger Menu Button */}
+      <button
+        className="burger-menu-button"
+        onClick={() => setIsMenuOpen(true)}
+        aria-label="Open menu"
+      >
+        ☰
+      </button>
+
+      {/* Burger Menu Component */}
+      <BurgerMenu
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        language={language}
+        onAccountClick={() => setShowAccount(true)}
+        onHistoryClick={() => setShowListHistory(true)}
+        user={user}
+      />
+
+      {/* Account Component */}
+      {showAccount && (
+        <Account onClose={() => setShowAccount(false)} language={language} />
+      )}
+
+      {/* List History Component */}
+      {showListHistory && (
+        <ListHistory
+          onClose={() => setShowListHistory(false)}
+          language={language}
+          user={user}
+        />
+      )}
+
+      {/* New List Modal */}
+      {showNewListModal && (
+        <NewListModal
+          onClose={() => setShowNewListModal(false)}
+          language={language}
+          user={user}
+          onListCreated={(newId) => {
+            setJustCreatedList(true);
+            // Reset the flag after a short delay
+            setTimeout(() => setJustCreatedList(false), 2000);
+          }}
+        />
+      )}
+
       <div className="language-selector">
         <button
           onClick={() => setLanguage("en")}
@@ -203,112 +478,117 @@ function App() {
       </div>
 
       <div className="container">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: "1rem",
-            marginTop: "-0.8rem",
-          }}
-        >
-          <a
-            href="https://www.buymeacoffee.com/radut"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bmc-button"
-            aria-label="Buy me a coffee"
-          >
-            ☕ <span className="bmc-text">{t.coffee}</span>
-          </a>
-        </div>
+        <h1 className={currentList?.name ? "custom-list-name" : ""}>
+          {currentList?.name || t.title}
+        </h1>
 
-        <h1>{t.title}</h1>
-
-        <div className="controls">
-          <button onClick={handleNewList}>🆕 {t.newList}</button>
-          <div className="share-wrapper" ref={shareRef}>
-            <button onClick={() => setShowShareOptions(!showShareOptions)}>
-              🔗 {t.share}
+        {/* Show different content based on user state and list selection */}
+        {user && id === "new" ? (
+          // Logged in user on the "new" route - show welcome state
+          <div className="welcome-state">
+            <p className="welcome-message">{t.welcomeMessage}</p>
+            <button
+              className="create-list-button"
+              onClick={() => setShowNewListModal(true)}
+            >
+              🆕 {t.createNewList}
             </button>
-
-            {showShareOptions && (
-              <div className="share-options">
-                <button onClick={copyToClipboard}>📋 {t.copyLink}</button>
-                <a
-                  href={shareOptions.whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  🟢 WhatsApp
-                </a>
-                <a
-                  href={shareOptions.telegram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  🔵 Telegram
-                </a>
-                <a href={shareOptions.sms}>💬 SMS</a>
-              </div>
-            )}
           </div>
-        </div>
+        ) : (
+          // User has a list selected or is not logged in
+          <>
+            <div className="controls">
+              <button onClick={handleNewList}>🆕 {t.newList}</button>
+              <div className="share-wrapper" ref={shareRef}>
+                <button onClick={() => setShowShareOptions(!showShareOptions)}>
+                  🔗 {t.share}
+                </button>
 
-        <div className="input-bar">
-          <input
-            type="text"
-            placeholder={t.placeholder}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addItem()}
-            className="item-name-input"
-          />
-
-          <div className="input-row">
-            <input
-              type="number"
-              placeholder={t.qtyPlaceholder}
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addItem()}
-              className="quantity-input"
-            />
-            <input
-              type="text"
-              placeholder={t.unitPlaceholder}
-              value={unit}
-              onChange={(e) => setUnit(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addItem()}
-              className="unit-input"
-            />
-          </div>
-
-          <button className="add-button" onClick={addItem}>
-            {t.add}
-          </button>
-        </div>
-
-        <ul className="list">
-          {items.map((item, index) => (
-            <li key={index} className={item.bought ? "bought" : ""}>
-              <div className="item-content" onClick={() => toggleItem(index)}>
-                <input type="checkbox" checked={item.bought} readOnly />
-                <span>
-                  {item.text}
-                  {item.quantity > 1 || item.unit
-                    ? ` — ${item.quantity}${item.unit ? " " + item.unit : ""}`
-                    : ""}
-                </span>
+                {showShareOptions && (
+                  <div className="share-options">
+                    <button onClick={copyToClipboard}>📋 {t.copyLink}</button>
+                    <a
+                      href={shareOptions.whatsapp}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      🟢 WhatsApp
+                    </a>
+                    <a
+                      href={shareOptions.telegram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      🔵 Telegram
+                    </a>
+                    <a href={shareOptions.sms}>💬 SMS</a>
+                  </div>
+                )}
               </div>
-              <button
-                className="delete-button"
-                onClick={() => handleDeleteItem(index)}
-              >
-                🗑️
+            </div>
+
+            <div className="input-bar">
+              <input
+                type="text"
+                placeholder={t.placeholder}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && addItem()}
+                className="item-name-input"
+              />
+
+              <div className="input-row">
+                <input
+                  type="number"
+                  placeholder={t.qtyPlaceholder}
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && addItem()}
+                  className="quantity-input"
+                />
+                <input
+                  type="text"
+                  placeholder={t.unitPlaceholder}
+                  value={unit}
+                  onChange={(e) => setUnit(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && addItem()}
+                  className="unit-input"
+                />
+              </div>
+
+              <button className="add-button" onClick={addItem}>
+                {t.add}
               </button>
-            </li>
-          ))}
-        </ul>
+            </div>
+
+            <ul className="list">
+              {items.map((item, index) => (
+                <li key={index} className={item.bought ? "bought" : ""}>
+                  <div
+                    className="item-content"
+                    onClick={() => toggleItem(index)}
+                  >
+                    <input type="checkbox" checked={item.bought} readOnly />
+                    <span>
+                      {item.text}
+                      {item.quantity > 1 || item.unit
+                        ? ` — ${item.quantity}${
+                            item.unit ? " " + item.unit : ""
+                          }`
+                        : ""}
+                    </span>
+                  </div>
+                  <button
+                    className="delete-button"
+                    onClick={() => handleDeleteItem(index)}
+                  >
+                    🗑️
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </div>
     </div>
   );

@@ -24,12 +24,11 @@ body {
 
 button,
 a {
-  color: #000 !important;              /* Force black text */
-  text-decoration: none !important;    /* Remove underline */
-  -webkit-tap-highlight-color: transparent;  /* Remove tap flash */
-  -webkit-touch-callout: none;         /* Disable iOS callout menu */
+  color: #000 !important; /* Force black text */
+  text-decoration: none !important; /* Remove underline */
+  -webkit-tap-highlight-color: transparent; /* Remove tap flash */
+  -webkit-touch-callout: none; /* Disable iOS callout menu */
 }
-
 
 .share-bar {
   text-align: center;
@@ -84,12 +83,20 @@ a {
   }
 }
 
-
 h1 {
   color: #222;
   text-align: center;
   font-size: 2rem;
   margin-bottom: 1rem;
+  font-family: "Patrick Hand", cursive;
+  word-wrap: break-word;
+  max-width: 100%;
+  line-height: 1.2;
+}
+
+h1.custom-list-name {
+  color: #222;
+  font-weight: bold;
 }
 
 .input-bar {
@@ -105,7 +112,7 @@ h1 {
   font-size: 1.2rem;
   border: 2px solid #000;
   border-radius: 8px;
-  font-family: 'Patrick Hand', cursive;
+  font-family: "Patrick Hand", cursive;
 }
 
 .input-bar input {
@@ -120,8 +127,6 @@ h1 {
   display: flex;
   gap: 0.5rem;
 }
-
-
 
 .share-options a,
 .share-options button {
@@ -138,54 +143,53 @@ h1 {
 /* ================================
    Floating Share Panel (Popup Style)
    ================================ */
-   .share-wrapper {
-    position: relative;
-    display: inline-block;
+.share-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.share-options {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  z-index: 100;
+  background: #fff8dc;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
+  animation: fadeInScale 0.2s ease-out forwards;
+  min-width: 180px;
+}
+
+.share-options a,
+.share-options button {
+  background: #fff;
+  border: 2px solid #000;
+  padding: 0.4rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: "Patrick Hand", cursive;
+  text-decoration: none;
+  color: inherit;
+  text-align: center;
+}
+
+/* Animation */
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
   }
-  
-  .share-options {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 0.5rem;
-    z-index: 100;
-    background: #fff8dc;
-    border: 2px solid #000;
-    border-radius: 8px;
-    padding: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
-    animation: fadeInScale 0.2s ease-out forwards;
-    min-width: 180px;
+  100% {
+    opacity: 1;
+    transform: scale(1);
   }
-  
-  .share-options a,
-  .share-options button {
-    background: #fff;
-    border: 2px solid #000;
-    padding: 0.4rem;
-    border-radius: 6px;
-    cursor: pointer;
-    font-family: 'Patrick Hand', cursive;
-    text-decoration: none;
-    color: inherit;
-    text-align: center;
-  }
-  
-  /* Animation */
-  @keyframes fadeInScale {
-    0% {
-      opacity: 0;
-      transform: scale(0.9);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-  
+}
 
 .quantity-input,
 .unit-input {
@@ -196,7 +200,7 @@ h1 {
   font-size: 1rem;
   border: 2px solid #000;
   border-radius: 8px;
-  font-family: 'Patrick Hand', cursive;
+  font-family: "Patrick Hand", cursive;
 }
 
 .add-button-container {
@@ -211,12 +215,11 @@ h1 {
   border: 2px solid #000;
   border-radius: 8px;
   background-color: #fff;
-  font-family: 'Patrick Hand', cursive;
+  font-family: "Patrick Hand", cursive;
   cursor: pointer;
   text-align: center;
   align-self: flex-start; /* 👈 this moves it to the left */
 }
-
 
 .add-button-container button {
   font-size: 2rem;
@@ -224,7 +227,7 @@ h1 {
   border: 2px solid #000;
   border-radius: 12px;
   background-color: #fff;
-  font-family: 'Patrick Hand', cursive;
+  font-family: "Patrick Hand", cursive;
   cursor: pointer;
 }
 
@@ -383,7 +386,7 @@ footer {
   border-radius: 999px;
   text-decoration: none;
   color: #000;
-  font-family: 'Patrick Hand', cursive;
+  font-family: "Patrick Hand", cursive;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s ease, background-color 0.2s ease;
   margin-left: auto; /* align to right inside flex */
@@ -394,8 +397,192 @@ footer {
   transform: scale(1.05);
 }
 
-
 .bmc-text {
   font-size: 1.1rem;
 }
 
+/* ================================
+   Welcome State Styles
+   ================================ */
+
+.welcome-state {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.welcome-message {
+  font-family: "Patrick Hand", cursive;
+  font-size: 1.3rem;
+  color: #666;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.create-list-button {
+  background-color: #5f7fff;
+  color: white;
+  border: 2px solid #5f7fff;
+  border-radius: 12px;
+  padding: 1rem 2rem;
+  font-family: "Patrick Hand", cursive;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(95, 127, 255, 0.3);
+}
+
+.create-list-button:hover {
+  background-color: #4a6bff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(95, 127, 255, 0.4);
+}
+
+.create-list-button:active {
+  transform: translateY(0);
+}
+
+/* ================================
+   Burger Menu Styles
+   ================================ */
+
+.burger-menu-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+  font-family: "Patrick Hand", cursive;
+  z-index: 1000;
+  transition: all 0.2s ease;
+}
+
+.burger-menu-button:hover {
+  background-color: #fff3b0;
+  transform: scale(1.05);
+}
+
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+  animation: fadeIn 0.3s ease;
+}
+
+.burger-menu {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 280px;
+  height: 100%;
+  background-color: #fff8dc;
+  border-left: 2px solid #000;
+  z-index: 1002;
+  transition: right 0.3s ease;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.burger-menu.open {
+  right: 0;
+}
+
+.menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 2px solid #000;
+  background-color: #fff;
+}
+
+.menu-header h3 {
+  margin: 0;
+  font-family: "Patrick Hand", cursive;
+  font-size: 1.5rem;
+  color: #222;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.close-button:hover {
+  background-color: #f0f0f0;
+}
+
+.menu-items {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.menu-item {
+  background: #fff;
+  border: 2px solid #000;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: "Patrick Hand", cursive;
+  font-size: 1.1rem;
+  text-align: left;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.menu-item:hover {
+  background-color: #fff3b0;
+  transform: translateX(5px);
+}
+
+.menu-divider {
+  height: 1px;
+  background-color: #000;
+  margin: 0.5rem 0;
+  opacity: 0.3;
+}
+
+.bmc-menu-item {
+  background-color: #fff8dc !important;
+  border-color: #5f7fff !important;
+  color: #5f7fff !important;
+  font-weight: bold;
+}
+
+.bmc-menu-item:hover {
+  background-color: #fff3b0 !important;
+  transform: translateX(5px);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 480px) {
+  .burger-menu {
+    width: 250px;
+  }
+
+  .menu-item {
+    font-size: 1rem;
+    padding: 0.6rem 0.8rem;
+  }
+
+  .burger-menu-button {
+    padding: 0.4rem 0.6rem;
+    font-size: 1.3rem;
+  }
+}
