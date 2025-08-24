@@ -10,6 +10,7 @@ import {
 import Account from "./components/Account";
 import ListHistory from "./components/ListHistory";
 import NewListModal from "./components/NewListModal";
+// import { Analytics } from "@vercel/analytics/next"
 import "./App.css";
 
 // Burger Menu Component

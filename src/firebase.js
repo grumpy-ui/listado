@@ -22,4 +22,10 @@ googleProvider.setCustomParameters({
   prompt: "select_account",
 });
 
+// Use auth emulator in development
+if (import.meta.env.DEV) {
+  // Uncomment the line below if you want to use Firebase Auth Emulator
+  // connectAuthEmulator(auth, "http://localhost:9099");
+}
+
 export { db, auth, googleProvider };
