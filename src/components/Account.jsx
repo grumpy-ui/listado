@@ -1,22 +1,22 @@
-import { useState, useEffect } from 'react'
-import { 
-  signInWithGoogle, 
-  signUpWithEmail, 
-  signInWithEmail, 
-  signOutUser, 
+import { useState, useEffect } from "react";
+import {
+  signInWithGoogle,
+  signUpWithEmail,
+  signInWithEmail,
+  signOutUser,
   getCurrentUser,
-  onAuthStateChange 
-} from '../lib/auth'
-import './Account.css'
+  onAuthStateChange,
+} from "../lib/auth";
+import "./Account.css";
 
 function Account({ onClose, language }) {
-  const [isSignUp, setIsSignUp] = useState(false)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [user, setUser] = useState(null)
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
 
   const translations = {
     en: {
@@ -69,7 +69,8 @@ function Account({ onClose, language }) {
       emailInUse: "Email-ul este deja folosit",
       userNotFound: "Utilizatorul nu a fost găsit",
       wrongPassword: "Parolă greșită",
-      tooManyRequests: "Prea multe încercări eșuate. Încearcă din nou mai târziu",
+      tooManyRequests:
+        "Prea multe încercări eșuate. Încearcă din nou mai târziu",
     },
     es: {
       account: "Cuenta",
@@ -97,87 +98,90 @@ function Account({ onClose, language }) {
       wrongPassword: "Contraseña incorrecta",
       tooManyRequests: "Demasiados intentos fallidos. Inténtalo más tarde",
     },
-  }
+  };
 
-  const t = translations[language]
+  const t = translations[language];
 
   useEffect(() => {
     const unsubscribe = onAuthStateChange((user) => {
-      setUser(user)
-    })
-    return () => unsubscribe()
-  }, [])
+      setUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleGoogleAuth = async () => {
-    setLoading(true)
-    setError('')
-    
-    const { user, error } = await signInWithGoogle()
-    
+    setLoading(true);
+    setError("");
+
+    console.log("Starting Google authentication...");
+    const { user, error } = await signInWithGoogle();
+
     if (error) {
-      setError(getErrorMessage(error))
+      console.error("Google auth error:", error);
+      setError(getErrorMessage(error));
     } else {
-      onClose()
+      console.log("Google auth successful:", user);
+      onClose();
     }
-    
-    setLoading(false)
-  }
+
+    setLoading(false);
+  };
 
   const handleEmailAuth = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
     // Validation
     if (!email || !password) {
-      setError(t.invalidEmail)
-      setLoading(false)
-      return
+      setError(t.invalidEmail);
+      setLoading(false);
+      return;
     }
 
     if (isSignUp && password !== confirmPassword) {
-      setError(t.passwordsDontMatch)
-      setLoading(false)
-      return
+      setError(t.passwordsDontMatch);
+      setLoading(false);
+      return;
     }
 
     if (password.length < 6) {
-      setError(t.weakPassword)
-      setLoading(false)
-      return
+      setError(t.weakPassword);
+      setLoading(false);
+      return;
     }
 
-    const { user, error } = isSignUp 
+    const { user, error } = isSignUp
       ? await signUpWithEmail(email, password)
-      : await signInWithEmail(email, password)
+      : await signInWithEmail(email, password);
 
     if (error) {
-      setError(getErrorMessage(error))
+      setError(getErrorMessage(error));
     } else {
-      onClose()
+      onClose();
     }
 
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   const handleSignOut = async () => {
-    setLoading(true)
-    const { error } = await signOutUser()
+    setLoading(true);
+    const { error } = await signOutUser();
     if (error) {
-      setError(error)
+      setError(error);
     }
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   const getErrorMessage = (error) => {
-    if (error.includes('email-already-in-use')) return t.emailInUse
-    if (error.includes('user-not-found')) return t.userNotFound
-    if (error.includes('wrong-password')) return t.wrongPassword
-    if (error.includes('too-many-requests')) return t.tooManyRequests
-    if (error.includes('weak-password')) return t.weakPassword
-    if (error.includes('invalid-email')) return t.invalidEmail
-    return error
-  }
+    if (error.includes("email-already-in-use")) return t.emailInUse;
+    if (error.includes("user-not-found")) return t.userNotFound;
+    if (error.includes("wrong-password")) return t.wrongPassword;
+    if (error.includes("too-many-requests")) return t.tooManyRequests;
+    if (error.includes("weak-password")) return t.weakPassword;
+    if (error.includes("invalid-email")) return t.invalidEmail;
+    return error;
+  };
 
   if (user) {
     return (
@@ -185,9 +189,11 @@ function Account({ onClose, language }) {
         <div className="account-content">
           <div className="account-header">
             <h2>{t.account}</h2>
-            <button className="close-button" onClick={onClose}>✕</button>
+            <button className="close-button" onClick={onClose}>
+              ✕
+            </button>
           </div>
-          
+
           <div className="account-body">
             <div className="user-info">
               <div className="user-avatar">
@@ -195,7 +201,7 @@ function Account({ onClose, language }) {
                   <img src={user.photoURL} alt="Profile" />
                 ) : (
                   <div className="avatar-placeholder">
-                    {user.email ? user.email[0].toUpperCase() : 'U'}
+                    {user.email ? user.email[0].toUpperCase() : "U"}
                   </div>
                 )}
               </div>
@@ -205,9 +211,9 @@ function Account({ onClose, language }) {
                 <p className="user-email">{user.email}</p>
               </div>
             </div>
-            
-            <button 
-              className="sign-out-button" 
+
+            <button
+              className="sign-out-button"
               onClick={handleSignOut}
               disabled={loading}
             >
@@ -216,7 +222,7 @@ function Account({ onClose, language }) {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -224,9 +230,11 @@ function Account({ onClose, language }) {
       <div className="account-content">
         <div className="account-header">
           <h2>{isSignUp ? t.signUp : t.signIn}</h2>
-          <button className="close-button" onClick={onClose}>✕</button>
+          <button className="close-button" onClick={onClose}>
+            ✕
+          </button>
         </div>
-        
+
         <div className="account-body">
           <form onSubmit={handleEmailAuth}>
             <div className="form-group">
@@ -240,7 +248,7 @@ function Account({ onClose, language }) {
                 disabled={loading}
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="password">{t.password}</label>
               <input
@@ -252,7 +260,7 @@ function Account({ onClose, language }) {
                 disabled={loading}
               />
             </div>
-            
+
             {isSignUp && (
               <div className="form-group">
                 <label htmlFor="confirmPassword">{t.confirmPassword}</label>
@@ -266,40 +274,39 @@ function Account({ onClose, language }) {
                 />
               </div>
             )}
-            
+
             {error && <div className="error-message">{error}</div>}
-            
-            <button 
-              type="submit" 
-              className="auth-button"
-              disabled={loading}
-            >
-              {loading ? t.loading : (isSignUp ? t.signUp : t.signIn)}
+
+            <button type="submit" className="auth-button" disabled={loading}>
+              {loading ? t.loading : isSignUp ? t.signUp : t.signIn}
             </button>
           </form>
-          
+
           <div className="divider">
             <span>{isSignUp ? t.orSignUpWith : t.orSignInWith}</span>
           </div>
-          
-          <button 
+
+          <button
             className="google-button"
             onClick={handleGoogleAuth}
             disabled={loading}
           >
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+            <img
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              alt="Google"
+            />
             {isSignUp ? t.googleSignUp : t.googleSignIn}
           </button>
-          
+
           <div className="toggle-auth">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => {
-                setIsSignUp(!isSignUp)
-                setError('')
-                setEmail('')
-                setPassword('')
-                setConfirmPassword('')
+                setIsSignUp(!isSignUp);
+                setError("");
+                setEmail("");
+                setPassword("");
+                setConfirmPassword("");
               }}
             >
               {isSignUp ? t.alreadyHaveAccount : t.dontHaveAccount}
@@ -308,7 +315,7 @@ function Account({ onClose, language }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Account
+export default Account;

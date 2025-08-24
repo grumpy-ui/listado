@@ -12,15 +12,31 @@ const firebaseConfig = {
   measurementId: "G-01FV2PL8EK",
 };
 
+// Initialize Firebase app
 const app = initializeApp(firebaseConfig);
+console.log("Firebase app initialized:", app.name);
+
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+// Configure Google provider for better mobile support
 const googleProvider = new GoogleAuthProvider();
 
-// Configure Google provider
+// Configure Google provider for better mobile support
 googleProvider.setCustomParameters({
   prompt: "select_account",
+  // Add these parameters for better mobile compatibility
+  access_type: "offline",
+  include_granted_scopes: true,
 });
+
+// Add scopes if needed
+googleProvider.addScope("email");
+googleProvider.addScope("profile");
+
+// Log auth configuration
+console.log("Auth domain:", firebaseConfig.authDomain);
+console.log("Google provider configured");
 
 // Use auth emulator in development
 if (import.meta.env.DEV) {

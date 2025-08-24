@@ -2,11 +2,7 @@ import { useEffect, useState } from "react";
 import { useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createNewList, subscribeToList, updateList } from "./lib/firestore";
-import {
-  onAuthStateChange,
-  getCurrentUser,
-  handleRedirectResult,
-} from "./lib/auth";
+import { onAuthStateChange, initializeAuth, checkAuthSetup } from "./lib/auth";
 import Account from "./components/Account";
 import ListHistory from "./components/ListHistory";
 import NewListModal from "./components/NewListModal";
@@ -227,11 +223,29 @@ function App() {
   // }, []);
 
   useEffect(() => {
-    // Handle any pending redirect results (for mobile Google sign-in)
-    handleRedirectResult().catch(console.error);
+    // Run diagnostic to check authentication setup
+    checkAuthSetup();
+
+    // Initialize authentication and handle any pending redirects
+    const initializeAuthentication = async () => {
+      try {
+        const { user: redirectUser, error } = await initializeAuth();
+        if (redirectUser) {
+          console.log("Successfully authenticated via redirect:", redirectUser);
+          setUser(redirectUser);
+        } else if (error) {
+          console.error("Authentication initialization error:", error);
+        }
+      } catch (error) {
+        console.error("Error initializing authentication:", error);
+      }
+    };
+
+    initializeAuthentication();
 
     // Listen to authentication state changes
     const unsubscribeAuth = onAuthStateChange((user) => {
+      console.log("Auth state changed:", user ? user.email : "No user");
       setUser(user);
 
       // Reset list ownership when user changes
@@ -240,10 +254,12 @@ function App() {
         setCurrentList(null);
         setItems([]);
         // Create a new anonymous list when user logs out
-        createNewList().then((newId) => {
-          // Update the URL without triggering navigation
-          window.history.replaceState(null, "", `/list/${newId}`);
-        });
+        createNewList()
+          .then((newId) => {
+            // Update the URL without triggering navigation
+            window.history.replaceState(null, "", `/list/${newId}`);
+          })
+          .catch(console.error);
       }
     });
 
@@ -457,6 +473,7 @@ function App() {
           language={language}
           user={user}
           onListCreated={(newId) => {
+            console.log("New list created with ID:", newId);
             setJustCreatedList(true);
             // Reset the flag after a short delay
             setTimeout(() => setJustCreatedList(false), 2000);
