@@ -4,7 +4,6 @@ import {
   signUpWithEmail,
   signInWithEmail,
   signOutUser,
-  getCurrentUser,
   onAuthStateChange,
 } from "../lib/auth";
 import "./Account.css";
@@ -158,6 +157,7 @@ function Account({ onClose, language }) {
     if (error) {
       setError(getErrorMessage(error));
     } else {
+      console.log("Email auth successful:", user?.email);
       onClose();
     }
 

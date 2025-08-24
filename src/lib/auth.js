@@ -35,14 +35,7 @@ export const initializeAuth = async () => {
 
 // Diagnostic function to check authentication setup
 export const checkAuthSetup = () => {
-  const isMobile =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
-
   console.log("=== Authentication Setup Diagnostic ===");
-  console.log("Device type:", isMobile ? "Mobile" : "Desktop");
-  console.log("User agent:", navigator.userAgent);
   console.log("Current URL:", window.location.href);
   console.log("Firebase auth domain:", auth.config.authDomain);
   console.log("Firebase project ID:", auth.config.projectId);
@@ -54,7 +47,6 @@ export const checkAuthSetup = () => {
   console.log("=======================================");
 
   return {
-    isMobile,
     authDomain: auth.config.authDomain,
     projectId: auth.config.projectId,
     currentUrl: window.location.href,
@@ -64,49 +56,35 @@ export const checkAuthSetup = () => {
 // Google Sign In
 export const signInWithGoogle = async () => {
   try {
-    // Check if we're on a mobile device
-    const isMobile =
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      );
+    console.log("Starting Google sign-in...");
 
-    console.log("Device type:", isMobile ? "Mobile" : "Desktop");
-    console.log("User agent:", navigator.userAgent);
-
-    if (isMobile) {
-      // Use redirect for mobile devices
-      console.log("Using redirect for mobile authentication");
-      console.log("Current URL before redirect:", window.location.href);
-
-      await signInWithRedirect(auth, googleProvider);
-      console.log("Redirect initiated");
-      return { user: null, error: null }; // Redirect will handle the rest
-    } else {
-      // Use popup for desktop devices
-      console.log("Using popup for desktop authentication");
+    // Try popup first (works on most devices)
+    try {
+      console.log("Attempting popup authentication...");
       const result = await signInWithPopup(auth, googleProvider);
+      console.log("Popup authentication successful:", result.user.email);
       return { user: result.user, error: null };
+    } catch (popupError) {
+      console.log("Popup failed, trying redirect...", popupError.code);
+
+      // If popup fails, use redirect
+      if (
+        popupError.code === "auth/popup-blocked" ||
+        popupError.code === "auth/popup-closed-by-user" ||
+        popupError.code === "auth/cancelled-popup-request"
+      ) {
+        console.log("Using redirect authentication...");
+        await signInWithRedirect(auth, googleProvider);
+        return { user: null, error: null }; // Redirect will handle the rest
+      } else {
+        // Re-throw other errors
+        throw popupError;
+      }
     }
   } catch (error) {
     console.error("Google sign-in error:", error);
     console.error("Error code:", error.code);
     console.error("Error message:", error.message);
-
-    // If popup is blocked on desktop, try redirect
-    if (
-      error.code === "auth/popup-blocked" ||
-      error.code === "auth/popup-closed-by-user"
-    ) {
-      try {
-        console.log("Popup blocked, trying redirect...");
-        await signInWithRedirect(auth, googleProvider);
-        return { user: null, error: null }; // Redirect will handle the rest
-      } catch (redirectError) {
-        console.error("Google redirect sign-in error:", redirectError);
-        return { user: null, error: redirectError.message };
-      }
-    }
-
     return { user: null, error: error.message };
   }
 };
@@ -163,5 +141,29 @@ export const handleRedirectResult = async () => {
   } catch (error) {
     console.error("Redirect result error:", error);
     return { user: null, error: error.message };
+  }
+};
+
+// Test Firebase configuration
+export const testFirebaseConfig = async () => {
+  try {
+    console.log("=== Testing Firebase Configuration ===");
+    console.log("Auth domain:", auth.config.authDomain);
+    console.log("Current hostname:", window.location.hostname);
+    console.log("Current origin:", window.location.origin);
+
+    // Test if we can access the auth domain
+    const testUrl = `https://${auth.config.authDomain}`;
+    console.log("Testing auth domain:", testUrl);
+
+    // Try to get the current user (this will test the connection)
+    const currentUser = auth.currentUser;
+    console.log("Current user:", currentUser ? currentUser.email : "None");
+
+    console.log("Firebase configuration test completed");
+    return { success: true, currentUser };
+  } catch (error) {
+    console.error("Firebase configuration test failed:", error);
+    return { success: false, error: error.message };
   }
 };

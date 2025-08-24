@@ -19,24 +19,28 @@ console.log("Firebase app initialized:", app.name);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Configure Google provider for better mobile support
+// Configure Google provider with minimal configuration
 const googleProvider = new GoogleAuthProvider();
 
-// Configure Google provider for better mobile support
+// Only set the prompt parameter for account selection
 googleProvider.setCustomParameters({
   prompt: "select_account",
-  // Add these parameters for better mobile compatibility
-  access_type: "offline",
-  include_granted_scopes: true,
 });
 
-// Add scopes if needed
+// Add basic scopes
 googleProvider.addScope("email");
 googleProvider.addScope("profile");
 
 // Log auth configuration
 console.log("Auth domain:", firebaseConfig.authDomain);
 console.log("Google provider configured");
+console.log("Current hostname:", window.location.hostname);
+console.log("Current origin:", window.location.origin);
+
+// Test Firebase connection
+auth.onAuthStateChanged((user) => {
+  console.log("Firebase auth state changed:", user ? user.email : "No user");
+});
 
 // Use auth emulator in development
 if (import.meta.env.DEV) {
