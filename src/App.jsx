@@ -6,6 +6,8 @@ import { onAuthStateChange, initializeAuth, checkAuthSetup } from "./lib/auth";
 import Account from "./components/Account";
 import ListHistory from "./components/ListHistory";
 import NewListModal from "./components/NewListModal";
+import Options from "./components/Options";
+import About from "./components/About";
 // import { Analytics } from "@vercel/analytics/next"
 import "./App.css";
 
@@ -16,6 +18,8 @@ function BurgerMenu({
   language,
   onAccountClick,
   onHistoryClick,
+  onOptionsClick,
+  onAboutClick,
   user,
 }) {
   const translations = {
@@ -23,18 +27,21 @@ function BurgerMenu({
       account: "Account",
       listHistory: "List History",
       options: "Options",
+      about: "About",
       coffee: "Buy me a coffee",
     },
     ro: {
       account: "Cont",
       listHistory: "Istoric liste",
       options: "Opțiuni",
+      about: "Despre",
       coffee: "Cumpără-mi o cafea",
     },
     es: {
       account: "Cuenta",
       listHistory: "Historial de listas",
       options: "Opciones",
+      about: "Acerca de",
       coffee: "Invítame a un café",
     },
   };
@@ -51,7 +58,10 @@ function BurgerMenu({
         onHistoryClick();
         break;
       case "options":
-        alert("Options functionality coming soon!");
+        onOptionsClick();
+        break;
+      case "about":
+        onAboutClick();
         break;
       default:
         break;
@@ -85,14 +95,21 @@ function BurgerMenu({
             className="menu-item"
             onClick={() => handleMenuClick("history")}
           >
-            📋 {t.listHistory}
+            {t.listHistory}
           </button>
 
           <button
             className="menu-item"
             onClick={() => handleMenuClick("options")}
           >
-            ⚙️ {t.options}
+            {t.options}
+          </button>
+
+          <button
+            className="menu-item"
+            onClick={() => handleMenuClick("about")}
+          >
+            {t.about}
           </button>
 
           <div className="menu-divider"></div>
@@ -104,7 +121,7 @@ function BurgerMenu({
             className="menu-item bmc-menu-item"
             aria-label="Buy me a coffee"
           >
-            ☕ {t.coffee}
+            {t.coffee}
           </a>
         </div>
       </div>
@@ -124,6 +141,8 @@ function App() {
   const [showAccount, setShowAccount] = useState(false);
   const [showListHistory, setShowListHistory] = useState(false);
   const [showNewListModal, setShowNewListModal] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [user, setUser] = useState(null);
   const [currentList, setCurrentList] = useState(null);
   const [listBelongsToUser, setListBelongsToUser] = useState(false);
@@ -264,6 +283,28 @@ function App() {
     });
 
     return () => unsubscribeAuth();
+  }, []);
+
+  // Load saved theme and font settings
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem("darkMode") === "true";
+    const savedFont = localStorage.getItem("selectedFont") || "patrick-hand";
+
+    // Apply saved settings
+    if (savedDarkMode) {
+      document.body.classList.add("theme-dark");
+    } else {
+      document.body.classList.remove("theme-dark");
+    }
+
+    document.body.classList.remove(
+      "font-patrick-hand",
+      "font-roboto",
+      "font-open-sans",
+      "font-lato",
+      "font-montserrat"
+    );
+    document.body.classList.add(`font-${savedFont}`);
   }, []);
 
   // Redirect logged-in users to "new" route if they don't have access to the current list
@@ -449,6 +490,8 @@ function App() {
         language={language}
         onAccountClick={() => setShowAccount(true)}
         onHistoryClick={() => setShowListHistory(true)}
+        onOptionsClick={() => setShowOptions(true)}
+        onAboutClick={() => setShowAbout(true)}
         user={user}
       />
 
@@ -479,6 +522,16 @@ function App() {
             setTimeout(() => setJustCreatedList(false), 2000);
           }}
         />
+      )}
+
+      {/* Options Component */}
+      {showOptions && (
+        <Options onClose={() => setShowOptions(false)} language={language} />
+      )}
+
+      {/* About Component */}
+      {showAbout && (
+        <About onClose={() => setShowAbout(false)} language={language} />
       )}
 
       <div className="language-selector">
@@ -516,37 +569,37 @@ function App() {
               className="create-list-button"
               onClick={() => setShowNewListModal(true)}
             >
-              🆕 {t.createNewList}
+              {t.createNewList}
             </button>
           </div>
         ) : (
           // User has a list selected or is not logged in
           <>
             <div className="controls">
-              <button onClick={handleNewList}>🆕 {t.newList}</button>
+              <button onClick={handleNewList}>{t.newList}</button>
               <div className="share-wrapper" ref={shareRef}>
                 <button onClick={() => setShowShareOptions(!showShareOptions)}>
-                  🔗 {t.share}
+                  {t.share}
                 </button>
 
                 {showShareOptions && (
                   <div className="share-options">
-                    <button onClick={copyToClipboard}>📋 {t.copyLink}</button>
+                    <button onClick={copyToClipboard}>{t.copyLink}</button>
                     <a
                       href={shareOptions.whatsapp}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      🟢 WhatsApp
+                      WhatsApp
                     </a>
                     <a
                       href={shareOptions.telegram}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      🔵 Telegram
+                      Telegram
                     </a>
-                    <a href={shareOptions.sms}>💬 SMS</a>
+                    <a href={shareOptions.sms}>SMS</a>
                   </div>
                 )}
               </div>
@@ -607,7 +660,7 @@ function App() {
                     className="delete-button"
                     onClick={() => handleDeleteItem(index)}
                   >
-                    🗑️
+                    ×
                   </button>
                 </li>
               ))}

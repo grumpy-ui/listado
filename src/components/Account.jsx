@@ -5,6 +5,7 @@ import {
   signInWithEmail,
   signOutUser,
   onAuthStateChange,
+  sendVerificationEmail,
 } from "../lib/auth";
 import "./Account.css";
 
@@ -16,6 +17,8 @@ function Account({ onClose, language }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [verificationPending, setVerificationPending] = useState(false);
 
   const translations = {
     en: {
@@ -43,6 +46,13 @@ function Account({ onClose, language }) {
       userNotFound: "User not found",
       wrongPassword: "Wrong password",
       tooManyRequests: "Too many failed attempts. Try again later",
+      emailVerificationRequired: "Email verification required",
+      emailVerificationSent:
+        "Verification email sent! Please check your inbox.",
+      emailNotVerified: "Please verify your email before signing in.",
+      resendVerification: "Resend verification email",
+      emailVerified: "Email verified successfully!",
+      backToSignIn: "Back to Sign In",
     },
     ro: {
       account: "Cont",
@@ -70,6 +80,14 @@ function Account({ onClose, language }) {
       wrongPassword: "Parolă greșită",
       tooManyRequests:
         "Prea multe încercări eșuate. Încearcă din nou mai târziu",
+      emailVerificationRequired: "Verificarea email-ului este obligatorie",
+      emailVerificationSent:
+        "Email-ul de verificare a fost trimis! Verifică-ți inbox-ul.",
+      emailNotVerified:
+        "Te rugăm să îți verifici email-ul înainte de conectare.",
+      resendVerification: "Retrimite email-ul de verificare",
+      emailVerified: "Email-ul a fost verificat cu succes!",
+      backToSignIn: "Înapoi la Conectare",
     },
     es: {
       account: "Cuenta",
@@ -96,6 +114,13 @@ function Account({ onClose, language }) {
       userNotFound: "Usuario no encontrado",
       wrongPassword: "Contraseña incorrecta",
       tooManyRequests: "Demasiados intentos fallidos. Inténtalo más tarde",
+      emailVerificationRequired: "Verificación de email requerida",
+      emailVerificationSent:
+        "¡Email de verificación enviado! Por favor revisa tu bandeja de entrada.",
+      emailNotVerified: "Por favor verifica tu email antes de iniciar sesión.",
+      resendVerification: "Reenviar email de verificación",
+      emailVerified: "¡Email verificado exitosamente!",
+      backToSignIn: "Volver a Iniciar Sesión",
     },
   };
 
@@ -103,10 +128,40 @@ function Account({ onClose, language }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChange((user) => {
-      setUser(user);
+      if (user) {
+        // Only consider user logged in if email is verified
+        if (user.emailVerified) {
+          setUser(user);
+          setVerificationSent(false);
+        } else {
+          // User exists but email not verified - don't log them in
+          setUser(null);
+          setVerificationSent(false);
+          // Sign out the unverified user
+          signOutUser();
+        }
+      } else {
+        setUser(null);
+        setVerificationSent(false);
+      }
     });
     return () => unsubscribe();
   }, []);
+
+  const handleResendVerification = async () => {
+    setLoading(true);
+    setError("");
+
+    const { error } = await sendVerificationEmail();
+
+    if (error) {
+      setError(getErrorMessage(error));
+    } else {
+      setVerificationSent(true);
+    }
+
+    setLoading(false);
+  };
 
   const handleGoogleAuth = async () => {
     setLoading(true);
@@ -157,8 +212,20 @@ function Account({ onClose, language }) {
     if (error) {
       setError(getErrorMessage(error));
     } else {
-      console.log("Email auth successful:", user?.email);
-      onClose();
+      if (isSignUp) {
+        setVerificationSent(true);
+        setVerificationPending(true);
+        setError(t.emailVerificationSent);
+        // Clear form after successful signup
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+        // Don't close modal - user needs to verify email
+      } else {
+        // For sign in, user should already be verified due to useEffect logic
+        console.log("Email auth successful:", user?.email);
+        onClose();
+      }
     }
 
     setLoading(false);
@@ -219,6 +286,53 @@ function Account({ onClose, language }) {
             >
               {loading ? t.loading : t.signOut}
             </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show verification pending screen
+  if (verificationPending) {
+    return (
+      <div className="account-modal">
+        <div className="account-content">
+          <div className="account-header">
+            <h2>{t.emailVerificationRequired}</h2>
+            <button className="close-button" onClick={onClose}>
+              ✕
+            </button>
+          </div>
+
+          <div className="account-body">
+            <div className="verification-pending">
+              <div className="verification-icon">📧</div>
+              <h3>{t.emailVerificationSent}</h3>
+              <p>{t.emailNotVerified}</p>
+
+              <button
+                className="resend-verification-button"
+                onClick={handleResendVerification}
+                disabled={loading || verificationSent}
+              >
+                {loading
+                  ? t.loading
+                  : verificationSent
+                  ? t.emailVerificationSent
+                  : t.resendVerification}
+              </button>
+
+              <button
+                className="back-to-signin-button"
+                onClick={() => {
+                  setVerificationPending(false);
+                  setVerificationSent(false);
+                  setError("");
+                }}
+              >
+                {t.backToSignIn}
+              </button>
+            </div>
           </div>
         </div>
       </div>

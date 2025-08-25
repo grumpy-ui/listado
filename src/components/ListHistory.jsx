@@ -144,7 +144,6 @@ function ListHistory({ onClose, language, user }) {
     navigate("/list/new");
     onClose();
   };
-
   const formatDate = (date) => {
     if (!date) return "";
 
@@ -203,15 +202,12 @@ function ListHistory({ onClose, language, user }) {
           ) : lists.length === 0 ? (
             <div className="empty-state">
               <p>{t.noLists}</p>
-              <button className="new-list-button" onClick={handleNewList}>
-                {t.createFirstList}
-              </button>
             </div>
           ) : (
             <>
               <div className="lists-header">
                 <button className="new-list-button" onClick={handleNewList}>
-                  🆕 {t.newList}
+                  {t.newList}
                 </button>
               </div>
 
@@ -243,13 +239,13 @@ function ListHistory({ onClose, language, user }) {
                         className="view-button"
                         onClick={() => handleViewList(list.id)}
                       >
-                        👁️ {t.view}
+                        {t.view}
                       </button>
                       <button
                         className="delete-button"
                         onClick={() => handleDeleteList(list.id, list.name)}
                       >
-                        🗑️ {t.delete}
+                        {t.delete}
                       </button>
                     </div>
                   </div>

@@ -6,6 +6,7 @@ import {
   signOut,
   onAuthStateChanged,
   getRedirectResult,
+  sendEmailVerification,
 } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
 
@@ -93,10 +94,30 @@ export const signInWithGoogle = async () => {
 export const signUpWithEmail = async (email, password) => {
   try {
     const result = await createUserWithEmailAndPassword(auth, email, password);
+    // Send email verification
+    await sendEmailVerification(result.user);
     return { user: result.user, error: null };
   } catch (error) {
     return { user: null, error: error.message };
   }
+};
+
+// Send email verification
+export const sendVerificationEmail = async () => {
+  try {
+    if (auth.currentUser && !auth.currentUser.emailVerified) {
+      await sendEmailVerification(auth.currentUser);
+      return { error: null };
+    }
+    return { error: "No user to verify or already verified" };
+  } catch (error) {
+    return { error: error.message };
+  }
+};
+
+// Check if user is verified
+export const isUserVerified = () => {
+  return auth.currentUser?.emailVerified || false;
 };
 
 // Email/Password Sign In
@@ -126,7 +147,16 @@ export const getCurrentUser = () => {
 
 // Listen to auth state changes
 export const onAuthStateChange = (callback) => {
-  return onAuthStateChanged(auth, callback);
+  return onAuthStateChanged(auth, (user) => {
+    // Only consider user logged in if email is verified
+    if (user && !user.emailVerified) {
+      // User exists but email not verified - treat as not logged in
+      callback(null);
+    } else {
+      // User is verified or no user - pass through as normal
+      callback(user);
+    }
+  });
 };
 
 // Handle redirect result (for mobile devices)
